@@ -28,7 +28,7 @@
 								$('#log').append('<p style="color:red;">I say: '+msg+'</p>');
 								$('#log').get(0).scrollTop = $('#log').get(0).scrollHeight;
 								$('#message').val('');
-								var ToWho = "@" + "{{.Name}}" + ":";
+								var ToWho = "@" + {{.Name}} + ":";
 								sock.send(ToWho + msg);
 						};
 				</script>

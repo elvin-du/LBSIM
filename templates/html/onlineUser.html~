@@ -2,12 +2,27 @@
 		<head>
 				<script type="text/javascript" src="http://img3.douban.com/js/packed_jquery.min6301986802.js"></script>
 				<script type="text/javascript" src="/templates/js/ws.js"></script>
+				<script type="text/javascript">
+						if(typeof(EventSource)!=="undefined")
+						{
+								var source=new EventSource("/example/html5/demo_sse.php");
+								source.onmessage=function(event)
+								{
+										document.getElementById("result").innerHTML+=event.data + "<br />";
+								};
+						}
+						else
+						{
+		document.getElementById("result").innerHTML="Sorry, your browser does not support server-sent events...";
+}
+		</script>						
 		</head>
 		<body>
 				<form align="center" action="/onlineUsers" method="POST">
 					<p>Select friend who you want to meet please!</p>
 					<input type="radio" name="chatOrRoute" value="chat" />chat
 					<input type="radio" name="chatOrRoute" value="route" />route
+					<br/>
 					{{with .AllUser}}
 						{{range .}}
 							<input type="radio" name="onlineUser" value="{{.Name}}"/>{{.Name}}<br/>

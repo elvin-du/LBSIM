@@ -3,6 +3,8 @@ package main
 import (
 	"code.google.com/p/go.net/websocket"
 	"fmt"
+	"errors"
+	"strings"
 	"html/template"
 	"log"
 	"os"
@@ -63,7 +65,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		//fmt.Println(lng)
 
 		if CheckUserPassword(username, password) {
-			SetCookie(w, username, password)
+			SetCookie(w, "LBSIM",username)
 
 			loc := Location{Latitude:lat, Longitude:lng}
 			onlineUser := OnlineUser{Name: username, Loc:&loc}
@@ -124,27 +126,64 @@ func Chat(w http.ResponseWriter, r *http.Request){
 
 func WebsocketChat(ws *websocket.Conn){
 		var err error
+		var toWho *websocket.Conn
+		var rcvMsg string
 		fmt.Println("WebsocketChat")
+		request := ws.Request()
+		cookie, err := request.Cookie("LBSIM")
+		name := cookie.Value
+		InsertConnData(name, ws)
 
 		for{
-				var reply string
-
-				if err = websocket.Message.Receive(ws, &reply); err != nil {
+				if err = websocket.Message.Receive(ws, &rcvMsg); err != nil {
 						fmt.Println("Can't receive")
 						fmt.Println(err)
 						break
 				}
+				fmt.Println("Received : " + rcvMsg)
 
-				fmt.Println("Received back from client: " + reply)
+				name, content, err := ParseRcvMsg(rcvMsg)
+				toWho = GetConnByName(name)
 
-				msg := "welcome to websocket do by pp"
-				fmt.Println("Sending to client: " + msg)
-
-				if err = websocket.Message.Send(ws, msg); err != nil {
+				if err = websocket.Message.Send(toWho, content); err != nil {
 						fmt.Println("Can't send")
+						fmt.Println(err)
 						break
 				}
 		}
+}
+
+func InsertConnData(name string, ws *websocket.Conn){
+		size := len(allOnlineUser.AllUser)
+
+		for i := 0; i < size; i++ {
+				if allOnlineUser.AllUser[i].Name == name{
+						allOnlineUser.AllUser[i].wsConn = ws
+						return
+				}
+		}
+}
+
+func GetConnByName(name string)*websocket.Conn{
+	size := len(allOnlineUser.AllUser)
+
+	for i := 0; i < size; i++ {
+			if allOnlineUser.AllUser[i].Name == name{
+					return allOnlineUser.AllUser[i].wsConn
+			}
+	}
+
+	return nil
+}
+
+func ParseRcvMsg(rcvMsg string)(name string, content string, err error){
+		index := strings.Index(rcvMsg, ":")
+		if -1 == index{
+				return "","",errors.New("can not find :")
+		}
+		name = rcvMsg[:index]
+		content = rcvMsg[index:]
+		return
 }
 
 func Route(w http.ResponseWriter, r *http.Request){
@@ -164,6 +203,12 @@ func Route(w http.ResponseWriter, r *http.Request){
 		end := Location{Longitude: loc.Longitude, Latitude:loc.Latitude}
 		err = t.Execute(w, end)
 		checkError(err)
+}
+
+func UpdateOnlineUsers(w http.ResponseWriter){
+		w.Header().Set("Content-Type", "text/event-stream")
+		w.Header().Set("Cache-Control", "no-cache")
+		w.Write([]byte("data: dddd"))
 }
 
 func checkError(err error) {
