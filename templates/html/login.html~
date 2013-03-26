@@ -1,0 +1,33 @@
+<!DOCTYPE HTML>
+<html>
+		<head>
+				<title>	LBSIM Login	</title>
+				<script type="text/javascript">
+						function savePosition(position){
+								document.loginForm.longitude.value = position.coords.longitude;
+								document.loginForm.lat.value = position.coords.latitude;
+						}
+
+						function getLocation(){
+								if (navigator.geolocation){
+										navigator.geolocation.getCurrentPosition(savePosition);
+								}else{
+										alert("The browser can not support geolocation");
+								}
+						}	
+				</script>
+		</head>
+		<body onload="getLocation()">
+				<p>Select friend who you want to go go meet please!</p>
+				<form  align="center" action="/login" method="POST" name="loginForm">
+				UserName: <input size="50" name="username" type="text" />
+				<br/>
+				Password: <input size="50" name="password" type="password" />
+				<br/>
+				<input style="height:25px; width:100px" type="submit" value="Login"/>
+				<br/>
+				<input type="hidden" name="longitude" id="lng"/>
+				<input type="hidden" name="latitude" id="lat"/>
+				</form>
+		</body>
+</html>

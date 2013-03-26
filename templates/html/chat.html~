@@ -1,0 +1,43 @@
+<html>
+		<head>
+				<script type="text/javascript" src="http://img3.douban.com/js/packed_jquery.min6301986802.js"></script>
+				<script type="text/javascript" src="/templates/js/ws.js"></script>
+				<script type="text/javascript">
+						var sock = null;
+						var wsuri = "ws://127.0.0.1:8888/websocketChat"
+						window.onload=function(){
+								console.log("onload");
+								sock = new WebSocket(wsuri);
+
+								sock.onopen = function(){
+										console.log("connected to " + wsuri);
+								}
+
+								sock.onclose = function(e) {
+										console.log("connection closed (" + e.code + ")");
+								}
+
+								sock.onmessage = function(e){
+										console.log("message received: " + e.data);
+										$('#log').append('<p> others says: '+e.data+'</p>');
+								}
+						};
+
+						function send() {
+								var msg = document.getElementById('message').value;
+								$('#log').append('<p style="color:red;">I say: '+msg+'</p>');
+								$('#log').get(0).scrollTop = $('#log').get(0).scrollHeight;
+								$('#message').val('');
+								var ToWho = "@" + "{{.Name}}" + ":";
+								sock.send(ToWho + msg);
+						};
+				</script>
+		</head>
+		<body>
+				<div id="log" style="height: 300px;overflow-y: scroll;border: 1px solid #CCC;">
+				</div>
+				<div>
+						Message: <input id="message" size=200; type="text"><button onclick="send();">Send Message</button>
+				</div>
+		</body>
+</html>

@@ -1,0 +1,19 @@
+<html>
+		<head>
+				<script type="text/javascript" src="http://img3.douban.com/js/packed_jquery.min6301986802.js"></script>
+				<script type="text/javascript" src="/templates/js/ws.js"></script>
+		</head>
+		<body>
+				<form align="center" action="/onlineUsers" method="POST">
+					<p>Select friend who you want to meet please!</p>
+					<input type="radio" name="chatOrRoute" value="chat" />chat
+					<input type="radio" name="chatOrRoute" value="route" />route
+					{{with .AllUser}}
+						{{range .}}
+							<input type="radio" name="onlineUser" value="{{.Name}}"/>{{.Name}}<br/>
+						{{end}}
+					{{end}}
+					<input type="submit" value="submit"/>
+				</form>
+		</body>
+</html>
