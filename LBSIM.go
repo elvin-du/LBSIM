@@ -9,9 +9,10 @@ import (
 
 func main() {
 	http.HandleFunc("/login", Login)
+	http.HandleFunc("/", Login)
+	http.HandleFunc("/register", Register)
 	http.HandleFunc("/onlineUsers", OnlineUsers)
 	http.HandleFunc("/templates/", assetsHandler)
-	http.HandleFunc("/", NotFoundHandler)
 	http.HandleFunc("/route", Route)
 	http.HandleFunc("/chat", Chat)
 	http.Handle("/websocketChat", websocket.Handler(WebsocketChat))

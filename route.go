@@ -6,7 +6,6 @@ import (
 	"errors"
 	"strings"
 	"html/template"
-	"log"
 	"os"
 	"net/http"
 	"strconv"
@@ -39,18 +38,6 @@ func FindLocByName(name string) *Location{
 	}
 
 	return nil
-}
-
-func NotFoundHandler(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path == "/" {
-		http.Redirect(w, r, "/login", http.StatusFound)
-	}
-
-	t, err := template.ParseFiles("templates/html/error.html")
-	if err != nil {
-		log.Println(err)
-	}
-	t.Execute(w, nil)
 }
 
 func Login(w http.ResponseWriter, r *http.Request) {
@@ -121,6 +108,16 @@ func Chat(w http.ResponseWriter, r *http.Request){
 		t, err := template.ParseFiles("templates/html/chat.html")
 		checkError(err)
 		err = t.Execute(w , toWho)
+		checkError(err)
+}
+
+func Register(w http.ResponseWriter,r *http.Request){
+		fmt.Println("Register")
+		r.ParseForm()
+
+		t,err := template.ParseFiles("templates/html/register.html")
+		checkError(err)
+		err = t.Execute(w, nil)
 		checkError(err)
 }
 
