@@ -1,13 +1,17 @@
 <html>
 <head>
 <meta charset="gb2312"/>
-<meta http-equiv="refresh" content="3"/>
+<script type="text/javascript">
+		function onlineUserRefresh(){
+				window.location.reload();
+		};
+</script>
 </head>
 <body>
 <form align="center" action="/onlineUsers" method="POST">
 		<p>Select friend who you want to meet please!</p>
 		<input type="radio" name="chatOrRoute" value="chat" />chat
-		<input type="radio" name="chatOrRoute" value="route" checked="checked" />route<br/>
+		<input type="radio" name="chatOrRoute" value="route" checked/>route<br/>
 		{{with .AllUser}}
 		{{range .}}
 		<input type="radio" name="onlineUser" value="{{.Name}}"/>{{.Name}}<br/>
