@@ -2,13 +2,13 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"log"
 	"net/http"
 	"code.google.com/p/go.net/websocket"
 )
 
 func main() {
+	log.SetFlags(log.Llongfile | log.LstdFlags)
 	http.HandleFunc("/login", Login)
 	http.HandleFunc("/", NotFoundHandler)
 	http.HandleFunc("/register", Register)
@@ -25,7 +25,6 @@ func main() {
 
 func checkError(err error) {
 	if err != nil {
-		fmt.Println("Fatal error ", err.Error())
-		os.Exit(1)
+		log.Fatal("checkError", err.Error())
 	}
 }

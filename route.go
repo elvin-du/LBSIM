@@ -22,6 +22,16 @@ func NotFoundHandler(w http.ResponseWriter, r *http.Request) {
   t.Execute(w, nil)
 }
 
+func Register(w http.ResponseWriter,r *http.Request){
+		fmt.Println("Register")
+		r.ParseForm()
+
+		t,err := template.ParseFiles("templates/html/register.html")
+		checkError(err)
+		err = t.Execute(w, nil)
+		checkError(err)
+}
+
 func Login(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Login")
 	r.ParseForm()
@@ -90,16 +100,6 @@ func Chat(w http.ResponseWriter, r *http.Request){
 		t, err := template.ParseFiles("templates/html/chat.html")
 		checkError(err)
 		err = t.Execute(w , toWho)
-		checkError(err)
-}
-
-func Register(w http.ResponseWriter,r *http.Request){
-		fmt.Println("Register")
-		r.ParseForm()
-
-		t,err := template.ParseFiles("templates/html/register.html")
-		checkError(err)
-		err = t.Execute(w, nil)
 		checkError(err)
 }
 
