@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"log"
 	"net/http"
 	"code.google.com/p/go.net/websocket"
@@ -9,10 +10,10 @@ import (
 
 func main() {
 	http.HandleFunc("/login", Login)
-	http.HandleFunc("/", Login)
+	http.HandleFunc("/", NotFoundHandler)
 	http.HandleFunc("/register", Register)
 	http.HandleFunc("/onlineUsers", OnlineUsers)
-	http.HandleFunc("/templates/", assetsHandler)
+	http.HandleFunc("/templates/", AssetsHandler)
 	http.HandleFunc("/route", Route)
 	http.HandleFunc("/chat", Chat)
 	http.Handle("/websocketChat", websocket.Handler(WebsocketChat))
@@ -23,7 +24,9 @@ func main() {
 	}
 }
 
-func assetsHandler(w http.ResponseWriter, r *http.Request) {
-	//Println(r.URL.Path[len("/")])
-	http.ServeFile(w, r, r.URL.Path[len("/"):])
+func checkError(err error) {
+	if err != nil {
+		fmt.Println("Fatal error ", err.Error())
+		os.Exit(1)
+	}
 }

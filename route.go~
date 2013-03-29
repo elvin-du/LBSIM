@@ -4,15 +4,13 @@ import (
 	"code.google.com/p/go.net/websocket"
 	"fmt"
 	"log"
-	"errors"
-	"strings"
 	"html/template"
-	"os"
 	"net/http"
 	"strconv"
 )
 
 func NotFoundHandler(w http.ResponseWriter, r *http.Request) {
+		fmt.Println("NotFoundHandler")
   if r.URL.Path == "/" {
     http.Redirect(w, r, "/login", http.StatusFound)
   }
@@ -151,4 +149,8 @@ func Route(w http.ResponseWriter, r *http.Request){
 		end := Location{Longitude: loc.Longitude, Latitude:loc.Latitude}
 		err = t.Execute(w, end)
 		checkError(err)
+}
+
+func AssetsHandler(w http.ResponseWriter, r *http.Request){
+		http.ServeFile(w, r, r.URL.Path[len("/"):])
 }

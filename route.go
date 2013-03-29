@@ -10,6 +10,7 @@ import (
 )
 
 func NotFoundHandler(w http.ResponseWriter, r *http.Request) {
+		fmt.Println("NotFoundHandler")
   if r.URL.Path == "/" {
     http.Redirect(w, r, "/login", http.StatusFound)
   }
