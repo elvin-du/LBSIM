@@ -9,7 +9,7 @@ import (
 
 func main() {
 	http.HandleFunc("/login", Login)
-	http.HandleFunc("/", Login)
+	http.HandleFunc("/", NotFoundHandler)
 	http.HandleFunc("/register", Register)
 	http.HandleFunc("/onlineUsers", OnlineUsers)
 	http.HandleFunc("/templates/", assetsHandler)

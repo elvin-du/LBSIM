@@ -3,6 +3,7 @@ package main
 import (
 	"code.google.com/p/go.net/websocket"
 	"fmt"
+	"log"
 	"errors"
 	"strings"
 	"html/template"
@@ -36,8 +37,19 @@ func FindLocByName(name string) *Location{
 					return allOnlineUser.AllUser[i].Loc
 			}
 	}
-
 	return nil
+}
+
+func NotFoundHandler(w http.ResponseWriter, r *http.Request) {
+  if r.URL.Path == "/" {
+    http.Redirect(w, r, "/login", http.StatusFound)
+  }
+
+  t, err := template.ParseFiles("templates/html/error.html")
+  if err != nil {
+    log.Println(err)
+  }
+  t.Execute(w, nil)
 }
 
 func Login(w http.ResponseWriter, r *http.Request) {
