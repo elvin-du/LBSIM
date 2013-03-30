@@ -53,6 +53,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 func Login(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Login")
 	r.ParseForm()
+	var data interface{}
 	if r.Method == "POST" {
 		username := r.FormValue("username")
 		password := r.FormValue("password")
@@ -71,12 +72,16 @@ func Login(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, "/onlineUsers", http.StatusFound)
 			return
 		} else {
-			fmt.Println("suername or password is wrong, please input again!")
+			type loginRet struct{
+					LoginRet string
+			}
+			data = loginRet{"wrongUsrPw"}
+			//fmt.Println("suername or password is wrong, please input again!")
 		}
 	}
 
 	t, _ := template.ParseFiles("templates/html/login.html")
-	t.Execute(w, nil)
+	t.Execute(w, data)
 }
 
 func OnlineUsers(w http.ResponseWriter, r *http.Request) {

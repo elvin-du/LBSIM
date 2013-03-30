@@ -65,7 +65,7 @@ func AddUser(username string, password string, pwConfirm string)error{
 				log.Print(e)
 				return e
 		}
-
+		defer db.Close()
 		querySql := "select name from LBSIM.users WHERE name = ' " + username + "'"
 		rows, e := db.Query(querySql)
 		if nil != e{

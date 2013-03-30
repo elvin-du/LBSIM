@@ -14,10 +14,15 @@ function getLocation(){
 		}else{
 				alert("The browser can not support geolocation");
 		}
+
+		if("wrongUsrPw" == {{.LoginRet}}){
+				alert("password or username is wrong,please input again");
+		}
 }	
 function register(){
 		window.location.href="/register";
 }
+
 </script>
 </head>
 <body onload="getLocation()">
