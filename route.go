@@ -35,14 +35,13 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		username := r.FormValue("username")
 		password := r.FormValue("password")
 		pwConfirm := r.FormValue("passwordConfirm")
-		ret, err := AddUser(username, password, pwConfirm)
+		err := AddUser(username, password, pwConfirm)
 		if  nil != err {
 			log.Println(err)
-			regRet = reg{RegisterResult: "registerFailed", RegisterReturnMsg:ret}
+			regRet = reg{RegisterResult: "registerFailed", RegisterReturnMsg:err.Error()}
+		}else{
+			regRet = reg{RegisterResult: "registerSuccessful", RegisterReturnMsg:"congratulation, register successfully"}
 		}
-		log.Print("fdsafaf")
-		log.Print(ret)
-		regRet = reg{RegisterResult: "registerSuccessful", RegisterReturnMsg:ret}
 	}
 
 	t, err := template.ParseFiles("templates/html/register.html")

@@ -2,6 +2,10 @@ package main
 
 import (
 	"code.google.com/p/go.net/websocket"
+	"errors"
+	"database/sql"
+	_"github.com/Go-SQL-Driver/MySQL"
+	"log"
 )
 
 type Location struct {
@@ -55,7 +59,36 @@ func GetConnByName(name string) *websocket.Conn {
 	return nil
 }
 
-func AddUser(username string, password string, pwConfirm string)(ret string, err error){
-		ret = "congratulation! register successful"
-		return
+func AddUser(username string, password string, pwConfirm string)error{
+		db, e := sql.Open("mysql", "root:dumx@tcp(localhost:3306)/LBSIM?charset=utf8")
+		if nil != e{
+				log.Print(e)
+				return e
+		}
+
+		querySql := "select name from LBSIM.users WHERE name = ' " + username + "'"
+		rows, e := db.Query(querySql)
+		if nil != e{
+				log.Print(e)
+				return e
+		}
+		if rows.Next(){
+				return errors.New("user exsited")
+		}
+
+		insertSql := "INSERT LBSIM.users SET name=?, password=?"
+		stmt, e := db.Prepare(insertSql)
+		if nil != e{
+				log.Print(e)
+				return e
+		}
+		defer stmt.Close()
+
+		_, e = stmt.Exec(username, password)
+		if nil != e{
+				log.Print(e)
+				return e
+		}
+
+		return nil
 }
