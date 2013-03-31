@@ -7,6 +7,8 @@ import (
 	"code.google.com/p/go.net/websocket"
 )
 
+var appName string = "LBSIM"
+
 func main() {
 	log.SetFlags(log.Llongfile | log.LstdFlags)
 	http.HandleFunc("/login", Login)

@@ -34,17 +34,25 @@ func CheckUserPassword(user string, password string) bool {
 	return false 
 }
 
-func SetCookie(w http.ResponseWriter, user string, password string) {
-	cookie := http.Cookie{Name: user, Value: password}
+func SetCookie(w http.ResponseWriter, user string) {
+	cookie := http.Cookie{Name: appName, Value: user}
 	http.SetCookie(w, &cookie)
 }
 
-func CheckCookie(r *http.Request) bool {
-	cookie, _ := r.Cookie("dumx")
-	fmt.Println(cookie.Value)
-	if "dumx" == cookie.Value{
-			return true
+func CheckCookie(r *http.Request) string{
+	cookie, err := r.Cookie(appName)
+	if nil != err{
+			fmt.Println(err)
+			return ""
 	}
-
-	return false
+	fmt.Println(cookie.Value)
+	return  cookie.Value
 }
+
+func CheckLoginStatus(w http.ResponseWriter,r *http.Request){
+		if ret := CheckCookie(r); ret == ""{
+				url := "/login"
+				http.Redirect(w,r, url, http.StatusFound)
+		}
+}
+

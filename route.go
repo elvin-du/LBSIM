@@ -11,6 +11,8 @@ import (
 
 func NotFoundHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("NotFoundHandler")
+	r.ParseForm()
+	CheckLoginStatus(w,r)
 	if r.URL.Path == "/" {
 		http.Redirect(w, r, "/login", http.StatusFound)
 	}
@@ -53,6 +55,10 @@ func Register(w http.ResponseWriter, r *http.Request) {
 func Login(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Login")
 	r.ParseForm()
+	if ret := CheckCookie(r); ret != ""{
+			url := "/onlineUsers?user=" + ret
+			http.Redirect(w,r, url, http.StatusFound)
+	}
 	var data interface{}
 	if r.Method == "POST" {
 		username := r.FormValue("username")
@@ -63,15 +69,15 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		//fmt.Println(lng)
 
 		if CheckUserPassword(username, password) {
-			SetCookie(w, "LBSIM", username)
+			SetCookie(w, username)
 
 			loc := Location{Latitude: lat, Longitude: lng}
 			onlineUser := OnlineUser{Name: username, Loc: &loc}
 			allOnlineUser.AllUser = append(allOnlineUser.AllUser, &onlineUser)
 
 			http.Redirect(w, r, "/onlineUsers", http.StatusFound)
-			return
 		} else {
+			SetCookie(w, "")
 			type loginRet struct{
 					LoginRet string
 			}
@@ -87,7 +93,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 func OnlineUsers(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("OnlineUsers")
 	r.ParseForm()
-
+	CheckLoginStatus(w,r)
 	if r.Method == "POST" {
 		withWho := r.FormValue("onlineUser")
 		var urlWithWho string
@@ -112,6 +118,7 @@ func OnlineUsers(w http.ResponseWriter, r *http.Request) {
 func Chat(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Chat")
 	r.ParseForm()
+	CheckLoginStatus(w,r)
 
 	withWho := r.Form.Get("withWho")
 	type ToWho struct {
@@ -132,7 +139,7 @@ func WebsocketChat(ws *websocket.Conn) {
 	var rcvMsg string
 	fmt.Println("WebsocketChat")
 	request := ws.Request()
-	cookie, err := request.Cookie("LBSIM")
+	cookie, err := request.Cookie(appName)
 	name := cookie.Value
 	InsertConnData(name, ws)
 
@@ -158,6 +165,7 @@ func WebsocketChat(ws *websocket.Conn) {
 func Route(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Route")
 	r.ParseForm()
+	CheckLoginStatus(w,r)
 
 	withWho := r.Form.Get("withWho")
 	if "" == withWho {
