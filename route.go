@@ -118,11 +118,16 @@ func OnlineUsers(w http.ResponseWriter, r *http.Request) {
 func Chat(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Chat")
 	r.ParseForm()
-	CheckLoginStatus(w,r)
-
 	withWho := r.Form.Get("withWho")
+
 	type ToWho struct {
 		Name string
+	}
+
+	if ret := CheckCookie(r); ret == "" || "" == withWho{
+			url := "/login"
+			http.Redirect(w,r, url, http.StatusFound)
+			return
 	}
 
 	toWho := ToWho{Name: withWho}
@@ -165,13 +170,14 @@ func WebsocketChat(ws *websocket.Conn) {
 func Route(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Route")
 	r.ParseForm()
-	CheckLoginStatus(w,r)
 
-	withWho := r.Form.Get("withWho")
-	if "" == withWho {
-		return
+	withWhom := r.Form.Get("withWho")
+	if ret := CheckCookie(r); ret == "" || "" == withWhom{
+			http.Redirect(w,r,"/login", http.StatusFound)
+			return //thie sentence is important, following line will exexute when no this line
 	}
-	loc := FindLocByName(withWho)
+
+	loc := FindLocByName(withWhom)
 
 	t, err := template.ParseFiles("templates/html/route.html")
 	checkError(err)

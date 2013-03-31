@@ -45,7 +45,7 @@ func CheckCookie(r *http.Request) string{
 			fmt.Println(err)
 			return ""
 	}
-	fmt.Println(cookie.Value)
+	log.Println(cookie.Value)
 	return  cookie.Value
 }
 
