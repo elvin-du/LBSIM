@@ -42,6 +42,7 @@ func InsertConnData(name string, ws *websocket.Conn) {
 	for i := 0; i < size; i++ {
 		if allOnlineUser.AllUser[i].Name == name {
 			allOnlineUser.AllUser[i].wsConn = ws
+			onlineUsersRefresh = true 
 			return
 		}
 	}

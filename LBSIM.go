@@ -8,6 +8,7 @@ import (
 )
 
 var appName string = "LBSIM"
+var onlineUsersRefresh bool
 
 func main() {
 	log.SetFlags(log.Llongfile | log.LstdFlags)
@@ -17,7 +18,8 @@ func main() {
 	http.HandleFunc("/onlineUsers", OnlineUsers)
 	http.HandleFunc("/route", Route)
 	http.HandleFunc("/chat", Chat)
-	http.Handle("/websocketChat", websocket.Handler(WebsocketChat))
+	http.Handle("/wsOnlineUsers", websocket.Handler(WsOnlineUsers))
+	http.Handle("/wsChat", websocket.Handler(WsChat))
 	fmt.Println("listen on port 8888")
 
 	if err := http.ListenAndServe(":8888", nil); err != nil {

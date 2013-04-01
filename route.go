@@ -138,7 +138,7 @@ func Chat(w http.ResponseWriter, r *http.Request) {
 	checkError(err)
 }
 
-func WebsocketChat(ws *websocket.Conn) {
+func WsChat(ws *websocket.Conn) {
 	var err error
 	var toWho *websocket.Conn
 	var rcvMsg string
@@ -166,6 +166,29 @@ func WebsocketChat(ws *websocket.Conn) {
 		}
 	}
 }
+
+func WsOnlineUsers(ws *websocket.Conn){
+		var err error
+		//var rcvMsg string
+
+		go func(){
+				for{
+						//if err = websocket.Message.Receive(ws, &rcvMsg); err != nil{
+					//	log.Println(err)
+					//	break
+				//}
+
+				if onlineUsersRefresh{
+						if err = websocket.Message.Send(ws, "Y"); err != nil {
+								log.Println(err)
+								break
+						}
+				}
+
+		}
+}()
+}
+
 
 func Route(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Route")

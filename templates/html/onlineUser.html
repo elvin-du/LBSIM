@@ -6,7 +6,23 @@
 				window.location.reload();
 		};
 
-		setTimeout('onlineUserRefresh()', 3000);
+		var sock = null;
+		var wsuri ='ws://localhost:8888/wsOnlineUsers';
+		window.onload=function(){
+				console.log("onload");
+				sock = new WebSocket(wsuri);
+				sock.onopen = function(){
+						console.log("connected to " + wsuri);
+				}
+				sock.onclose = function(e) {
+						console.log("connection closed (" + e.code + ")");
+				}
+
+				sock.onmessage = function(e){
+						console.log("message received: " + e.data);
+						onlineUserRefresh();
+				}
+		};
 </script>
 </head>
 <body>
