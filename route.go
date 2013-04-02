@@ -3,6 +3,7 @@ package main
 import (
 	"code.google.com/p/go.net/websocket"
 	"fmt"
+	"time"
 	"html/template"
 	"log"
 	"net/http"
@@ -12,7 +13,6 @@ import (
 func NotFoundHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("NotFoundHandler")
 	r.ParseForm()
-	CheckLoginStatus(w,r)
 	if r.URL.Path == "/" {
 		http.Redirect(w, r, "/login", http.StatusFound)
 	}
@@ -56,8 +56,12 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Login")
 	r.ParseForm()
 	if ret := CheckCookie(r); ret != ""{
-			url := "/onlineUsers?user=" + ret
+			AddOnlineUser(ret, "", 0, 0)
+			url := "/onlineUsers?who=" + ret
 			http.Redirect(w,r, url, http.StatusFound)
+			return
+	}else{
+			log.Println(ret)
 	}
 	var data interface{}
 	if r.Method == "POST" {
@@ -70,12 +74,9 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 		if CheckUserPassword(username, password) {
 			SetCookie(w, username)
-
-			loc := Location{Latitude: lat, Longitude: lng}
-			onlineUser := OnlineUser{Name: username, Loc: &loc}
-			allOnlineUser.AllUser = append(allOnlineUser.AllUser, &onlineUser)
-
-			http.Redirect(w, r, "/onlineUsers", http.StatusFound)
+			AddOnlineUser(username, password, lat, lng)
+			url := "/onlineUsers?who=" + username
+			http.Redirect(w, r, url, http.StatusFound)
 		} else {
 			SetCookie(w, "")
 			type loginRet struct{
@@ -93,7 +94,11 @@ func Login(w http.ResponseWriter, r *http.Request) {
 func OnlineUsers(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("OnlineUsers")
 	r.ParseForm()
-	CheckLoginStatus(w,r)
+	who := r.Form.Get("who")
+	if "" == who{
+			http.Redirect(w,r,"/login", http.StatusFound)
+			return //thie sentence is important, following line will exexute when no this line
+	}
 	if r.Method == "POST" {
 		withWho := r.FormValue("onlineUser")
 		var urlWithWho string
@@ -124,7 +129,7 @@ func Chat(w http.ResponseWriter, r *http.Request) {
 		Name string
 	}
 
-	if ret := CheckCookie(r); ret == "" || "" == withWho{
+	if withWho == ""{
 			url := "/login"
 			http.Redirect(w,r, url, http.StatusFound)
 			return
@@ -146,7 +151,7 @@ func WsChat(ws *websocket.Conn) {
 	request := ws.Request()
 	cookie, err := request.Cookie(appName)
 	name := cookie.Value
-	InsertConnData(name, ws)
+	InsertWsChatConnData(name, ws)
 
 	for {
 		if err = websocket.Message.Receive(ws, &rcvMsg); err != nil {
@@ -168,34 +173,32 @@ func WsChat(ws *websocket.Conn) {
 }
 
 func WsOnlineUsers(ws *websocket.Conn){
-		var err error
-		//var rcvMsg string
-
-		go func(){
-				for{
-						//if err = websocket.Message.Receive(ws, &rcvMsg); err != nil{
-					//	log.Println(err)
-					//	break
+	//	var err error
+	//	var rcvMsg string
+		request := ws.Request()
+		cookie, _:= request.Cookie(appName)
+		name := cookie.Value
+		InsertWsOnlineUserConnData(name, ws)
+		log.Println("WsOnlineUser")
+		for{
+				time.Sleep(5000)
+				if err = websocket.Message.Receive(ws, &rcvMsg); err != nil{
+					log.Println(err)
+					break
+			}
+			//if err = websocket.Message.Send(ws, "Y"); err != nil {
+				//		log.Println(err)
+				//		break
 				//}
-
-				if onlineUsersRefresh{
-						if err = websocket.Message.Send(ws, "Y"); err != nil {
-								log.Println(err)
-								break
-						}
-				}
-
 		}
-}()
 }
-
 
 func Route(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Route")
 	r.ParseForm()
 
 	withWhom := r.Form.Get("withWho")
-	if ret := CheckCookie(r); ret == "" || "" == withWhom{
+	if "" == withWhom{
 			http.Redirect(w,r,"/login", http.StatusFound)
 			return //thie sentence is important, following line will exexute when no this line
 	}

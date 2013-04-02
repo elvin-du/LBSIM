@@ -16,7 +16,8 @@ type Location struct {
 type OnlineUser struct {
 	Name   string
 	Loc    *Location
-	wsConn *websocket.Conn
+	wsChatConn *websocket.Conn
+	wsOnlineUserConn *websocket.Conn
 }
 
 type AllOnlineUser struct {
@@ -36,16 +37,43 @@ func FindLocByName(name string) *Location {
 	return nil
 }
 
-func InsertConnData(name string, ws *websocket.Conn) {
+func InsertWsChatConnData(name string, ws *websocket.Conn) {
 	size := len(allOnlineUser.AllUser)
 
 	for i := 0; i < size; i++ {
 		if allOnlineUser.AllUser[i].Name == name {
-			allOnlineUser.AllUser[i].wsConn = ws
-			onlineUsersRefresh = true 
+			allOnlineUser.AllUser[i].wsChatConn = ws
+			onlineUsersRefresh <- true
 			return
 		}
 	}
+}
+
+func InsertWsOnlineUserConnData(name string, ws *websocket.Conn) {
+	size := len(allOnlineUser.AllUser)
+
+	for i := 0; i < size; i++ {
+		if allOnlineUser.AllUser[i].Name == name {
+			allOnlineUser.AllUser[i].wsOnlineUserConn= ws
+			onlineUsersRefresh <- true
+			return
+		}
+	}
+}
+
+func UpdateOnlineUsers(){
+		<-onlineUsersRefresh
+		size := len(allOnlineUser.AllUser)
+		for i:=0; i<size; i++{
+				ws := allOnlineUser.AllUser[i].wsOnlineUserConn
+				if nil == ws{
+						continue
+				}
+				if err := websocket.Message.Send(ws, "Y"); err != nil {
+						log.Println(err)
+						continue
+				}
+		}
 }
 
 func GetConnByName(name string) *websocket.Conn {
@@ -53,11 +81,18 @@ func GetConnByName(name string) *websocket.Conn {
 
 	for i := 0; i < size; i++ {
 		if allOnlineUser.AllUser[i].Name == name {
-			return allOnlineUser.AllUser[i].wsConn
+			return allOnlineUser.AllUser[i].wsChatConn
 		}
 	}
 
 	return nil
+}
+
+func AddOnlineUser(username string, pw string, lat float64, lng float64){
+		loc := Location{Latitude: lat, Longitude: lng}
+		onlineUser := OnlineUser{Name: username, Loc: &loc}
+		allOnlineUser.AllUser = append(allOnlineUser.AllUser, &onlineUser)
+		onlineUsersRefresh <- true
 }
 
 func AddUser(username string, password string, pwConfirm string)error{

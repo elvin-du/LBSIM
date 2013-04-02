@@ -14,3 +14,4 @@ func ParseRcvMsg(rcvMsg string)(name string, content string, err error){
 		content = rcvMsg[index:]
 		return
 }
+

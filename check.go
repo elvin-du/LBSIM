@@ -48,11 +48,3 @@ func CheckCookie(r *http.Request) string{
 	log.Println(cookie.Value)
 	return  cookie.Value
 }
-
-func CheckLoginStatus(w http.ResponseWriter,r *http.Request){
-		if ret := CheckCookie(r); ret == ""{
-				url := "/login"
-				http.Redirect(w,r, url, http.StatusFound)
-		}
-}
-
