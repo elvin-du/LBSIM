@@ -2,20 +2,17 @@ package main
 
 import (
 	"code.google.com/p/go.net/websocket"
-	"fmt"
+	"strconv"
 	"time"
 	"html/template"
 	"log"
 	"net/http"
-	"strconv"
+	"net/url"
 )
 
-func NotFoundHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("NotFoundHandler")
+func notFoundHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("notFoundHandler")
 	r.ParseForm()
-	if r.URL.Path == "/" {
-		http.Redirect(w, r, "/login", http.StatusFound)
-	}
 
 	t, err := template.ParseFiles("templates/html/error.html")
 	if err != nil {
@@ -24,165 +21,146 @@ func NotFoundHandler(w http.ResponseWriter, r *http.Request) {
 	t.Execute(w, nil)
 }
 
-func Register(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Register")
+func registerGet(w http.ResponseWriter, r *http.Request) {
+	log.Println("registerGet")
 	r.ParseForm()
-	var regRet interface{} = nil
-	type reg struct {
-		RegisterResult    string
-		RegisterReturnMsg string
-	}
-
-	if r.Method == "POST" {
-		username := r.FormValue("username")
-		password := r.FormValue("password")
-		pwConfirm := r.FormValue("passwordConfirm")
-		err := AddUser(username, password, pwConfirm)
-		if  nil != err {
-			log.Println(err)
-			regRet = reg{RegisterResult: "registerFailed", RegisterReturnMsg:err.Error()}
-		}else{
-			regRet = reg{RegisterResult: "registerSuccessful", RegisterReturnMsg:"congratulation, register successfully"}
-		}
-	}
 
 	t, err := template.ParseFiles("templates/html/register.html")
-	checkError(err)
-	err = t.Execute(w, regRet)
-	checkError(err)
+	CheckError(err)
+	err = t.Execute(w, nil)
+	CheckError(err)
 }
 
-func Login(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Login")
+func loginGet(w http.ResponseWriter, r *http.Request) {
+	log.Println("loginGet")
 	r.ParseForm()
-	if ret := CheckCookie(r); ret != ""{
-			AddOnlineUser(ret, "", 0, 0)
-			url := "/onlineUsers?who=" + ret
-			http.Redirect(w,r, url, http.StatusFound)
+	if name,pw,err := CheckCookie(r); err == nil{
+			log.Println(name)
+			http.PostForm("http://localhost:8888/login",url.Values{"username":{name}, "password":{pw}})
 			return
 	}else{
-			log.Println(ret)
-	}
-	var data interface{}
-	if r.Method == "POST" {
-		username := r.FormValue("username")
-		password := r.FormValue("password")
-		lat, _ := strconv.ParseFloat(r.FormValue("latitude"), 64)
-		lng, _ := strconv.ParseFloat(r.FormValue("longitude"), 64)
-		//fmt.Println(lat)
-		//fmt.Println(lng)
-
-		if CheckUserPassword(username, password) {
-			SetCookie(w, username)
-			AddOnlineUser(username, password, lat, lng)
-			url := "/onlineUsers?who=" + username
-			http.Redirect(w, r, url, http.StatusFound)
-		} else {
-			SetCookie(w, "")
-			type loginRet struct{
-					LoginRet string
-			}
-			data = loginRet{"wrongUsrPw"}
-			//fmt.Println("suername or password is wrong, please input again!")
-		}
+			log.Println(err)
 	}
 
-	t, _ := template.ParseFiles("templates/html/login.html")
-	t.Execute(w, data)
+	t, err := template.ParseFiles("templates/html/login.html")
+	CheckError(err)
+	err = t.Execute(w, nil)
+	CheckError(err)
 }
 
-func OnlineUsers(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("OnlineUsers")
+func onlineFriendsGet(w http.ResponseWriter, r *http.Request) {
+	log.Println("onlineFriendsGet")
 	r.ParseForm()
-	who := r.Form.Get("who")
-	if "" == who{
-			http.Redirect(w,r,"/login", http.StatusFound)
-			return //thie sentence is important, following line will exexute when no this line
-	}
-	if r.Method == "POST" {
-		withWho := r.FormValue("onlineUser")
-		var urlWithWho string
-		chatOrRoute := r.FormValue("chatOrRoute")
-		if "chat" == chatOrRoute {
-			urlWithWho = "/chat?withWho=" + withWho
-		} else if "route" == chatOrRoute {
-			urlWithWho = "/route?withWho=" + withWho
-		}
-
-		http.Redirect(w, r, urlWithWho, http.StatusFound)
-		return
+	//who := r.Form.Get("who")
+	if name,pw,err := CheckCookie(r); err == nil{
+			log.Println(name)
+			http.PostForm("/login",url.Values{"username":{name}, "password":{pw}})
+			return
+	}else{
+			log.Println(err)
 	}
 
-	t, err := template.ParseFiles("templates/html/onlineUser.html")
-	checkError(err)
-
-	err = t.Execute(w, allOnlineUser)
-	checkError(err)
+	t, err := template.ParseFiles("templates/html/onlineFriends.html")
+	CheckError(err)
+	err = t.Execute(w, allOnlineFriend)
+	CheckError(err)
 }
 
-func Chat(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Chat")
+func chatGet(w http.ResponseWriter, r *http.Request) {
+	log.Println("chat")
 	r.ParseForm()
+
+	if name, pw,err := CheckCookie(r); err == nil{
+			log.Println(name)
+			http.PostForm("/login",url.Values{"username":{name}, "password":{pw}})
+			return
+	}else{
+			log.Println(err)
+	}
+
 	withWho := r.Form.Get("withWho")
-
 	type ToWho struct {
 		Name string
 	}
-
-	if withWho == ""{
-			url := "/login"
-			http.Redirect(w,r, url, http.StatusFound)
-			return
-	}
-
 	toWho := ToWho{Name: withWho}
 
 	t, err := template.ParseFiles("templates/html/chat.html")
-	checkError(err)
+	CheckError(err)
 	err = t.Execute(w, toWho)
-	checkError(err)
+	CheckError(err)
 }
 
-func WsChat(ws *websocket.Conn) {
+func routeToFriendGet(w http.ResponseWriter, r *http.Request) {
+	log.Println("routeToFriendGet")
+	r.ParseForm()
+	if name, pw,err := CheckCookie(r); err == nil{
+			log.Println(name)
+			http.PostForm("localhost:8888/login",url.Values{"username":{name}, "password":{pw}})
+			return
+	}else{
+			log.Println(err)
+	}
+
+	t, err := template.ParseFiles("templates/html/route.html")
+	CheckError(err)
+
+	withWho := r.Form.Get("withWho")
+	loc := FindLocByName(withWho)
+	//log.Println(loc.Longitude, loc.Latitude)
+	end := Location{Longitude: loc.Longitude, Latitude: loc.Latitude}
+	err = t.Execute(w, end)
+	CheckError(err)
+}
+
+func wsChat(ws *websocket.Conn) {
+	log.Println("wsChat")
+
+	req := ws.Request()
+	if name,_, err := CheckCookie(req); err == nil{
+			log.Println(name)
+			InsertWsChatConnData(name, ws)
+	}else{
+			log.Println(err)
+			return
+	}
+
 	var err error
 	var toWho *websocket.Conn
 	var rcvMsg string
-	fmt.Println("WebsocketChat")
-	request := ws.Request()
-	cookie, err := request.Cookie(appName)
-	name := cookie.Value
-	InsertWsChatConnData(name, ws)
 
 	for {
 		if err = websocket.Message.Receive(ws, &rcvMsg); err != nil {
-			fmt.Println("Can't receive")
-			fmt.Println(err)
+			log.Println(err)
 			break
 		}
-		fmt.Println("Received : " + rcvMsg)
+		log.Println("Received : " + rcvMsg)
 
 		name, content, err := ParseRcvMsg(rcvMsg)
 		toWho = GetConnByName(name)
-
 		if err = websocket.Message.Send(toWho, content); err != nil {
-			fmt.Println("Can't send")
-			fmt.Println(err)
+			log.Println(err)
 			break
 		}
 	}
 }
 
-func WsOnlineUsers(ws *websocket.Conn){
-	//	var err error
-	//	var rcvMsg string
-		request := ws.Request()
-		cookie, _:= request.Cookie(appName)
-		name := cookie.Value
-		InsertWsOnlineUserConnData(name, ws)
-		log.Println("WsOnlineUser")
+func wsOnlineFriends(ws *websocket.Conn){
+		log.Println("wsOnlineFriends")
+
+		req := ws.Request()
+		if name,_, err := CheckCookie(req); err == nil{
+			log.Println(name)
+			InsertWsOnlineFriendConnData(name, ws)
+		}else{
+				log.Println(err)
+				return
+		}
+
+		//	var err error
+		var rcvMsg string
 		for{
 				time.Sleep(5000)
-				if err = websocket.Message.Receive(ws, &rcvMsg); err != nil{
+				if err := websocket.Message.Receive(ws, &rcvMsg); err != nil{
 					log.Println(err)
 					break
 			}
@@ -193,23 +171,73 @@ func WsOnlineUsers(ws *websocket.Conn){
 		}
 }
 
-func Route(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Route")
+func registerPost(w http.ResponseWriter, r *http.Request) {
+	log.Println("registerPost")
 	r.ParseForm()
-
-	withWhom := r.Form.Get("withWho")
-	if "" == withWhom{
-			http.Redirect(w,r,"/login", http.StatusFound)
-			return //thie sentence is important, following line will exexute when no this line
+	var regRet interface{} = nil
+	type reg struct {
+		RegisterResult    string
+		RegisterReturnMsg string
 	}
 
-	loc := FindLocByName(withWhom)
+	username := r.FormValue("username")
+	password := r.FormValue("password")
+	pwConfirm := r.FormValue("passwordConfirm")
+	err := AddUser(username, password, pwConfirm)
+	if  nil != err {
+			log.Println(err)
+			regRet = reg{RegisterResult: "registerFailed", RegisterReturnMsg:err.Error()}
+	}else{
+			regRet = reg{RegisterResult: "registerSuccessful", RegisterReturnMsg:"congratulation, register successfully"}
+	}
 
-	t, err := template.ParseFiles("templates/html/route.html")
-	checkError(err)
+	t, err := template.ParseFiles("templates/html/register.html")
+	CheckError(err)
+	err = t.Execute(w, regRet)
+	CheckError(err)
+}
 
-	//fmt.Println(loc.Longitude, loc.Latitude)
-	end := Location{Longitude: loc.Longitude, Latitude: loc.Latitude}
-	err = t.Execute(w, end)
-	checkError(err)
+func loginPost(w http.ResponseWriter, r *http.Request) {
+	log.Println("loginPost")
+	r.ParseForm()
+
+	var data interface{}
+	username := r.FormValue("username")
+	password := r.FormValue("password")
+	lat, _ := strconv.ParseFloat(r.FormValue("latitude"), 64)
+	lng, _ := strconv.ParseFloat(r.FormValue("longitude"), 64)
+	//log.Println(lat)
+	//log.Println(lng)
+
+	if CheckUserPassword(username, password) {
+			SetCookie(w, username, password)
+			AddOnlineFriend(username, password, lat, lng)
+			url := "/onlineFriends?who=" + username
+			http.Redirect(w, r, url, http.StatusFound)
+	} else {
+			SetCookie(w, "", "")
+			type loginRet struct{
+					LoginRet string
+			}
+			data = loginRet{"wrongUsrPw"}
+			//log.Println("suername or password is wrong, please input again!")
+	}
+
+	t, _ := template.ParseFiles("templates/html/login.html")
+	t.Execute(w, data)
+}
+
+func onlineFriendsPost(w http.ResponseWriter, r *http.Request) {
+	log.Println("onlineFriendsPost")
+	r.ParseForm()
+
+	withWho := r.FormValue("onlineUser")
+	chatOrRoute := r.FormValue("chatOrRoute")
+	var urlWithWho string
+	if "chat" == chatOrRoute {
+			urlWithWho = "/chat?withWho=" + withWho
+	} else if "route" == chatOrRoute {
+			urlWithWho = "/routeToFriend?withWho=" + withWho
+	}
+	http.Redirect(w, r, urlWithWho, http.StatusFound)
 }

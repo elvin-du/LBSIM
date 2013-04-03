@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"database/sql"
@@ -31,20 +30,23 @@ func CheckUserPassword(user string, password string) bool {
 			}
 	}
 
-	return false 
+	return false
 }
 
-func SetCookie(w http.ResponseWriter, user string) {
+func SetCookie(w http.ResponseWriter, user, pw string) {
 	cookie := http.Cookie{Name: appName, Value: user}
 	http.SetCookie(w, &cookie)
 }
 
-func CheckCookie(r *http.Request) string{
+func CheckCookie(r *http.Request) (name ,pw string, err error){
 	cookie, err := r.Cookie(appName)
-	if nil != err{
-			fmt.Println(err)
-			return ""
+	if nil == err{
+			name = cookie.Value
+			pw = ""
+			//if "" == name{
+			//j		err = errors.New("the value of cookie is empty")
+		//	}
 	}
-	log.Println(cookie.Value)
-	return  cookie.Value
+
+	return
 }

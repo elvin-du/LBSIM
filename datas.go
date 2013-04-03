@@ -13,59 +13,59 @@ type Location struct {
 	Longitude float64
 }
 
-type OnlineUser struct {
+type OnlineFriend struct {
 	Name   string
 	Loc    *Location
 	wsChatConn *websocket.Conn
-	wsOnlineUserConn *websocket.Conn
+	wsOnlineFriendConn *websocket.Conn
 }
 
-type AllOnlineUser struct {
-	AllUser []*OnlineUser
+type AllOnlineFriend struct {
+	AllUser []*OnlineFriend
 }
 
-var allOnlineUser AllOnlineUser
+var allOnlineFriend AllOnlineFriend
 
 func FindLocByName(name string) *Location {
-	size := len(allOnlineUser.AllUser)
+	size := len(allOnlineFriend.AllUser)
 
 	for i := 0; i < size; i++ {
-		if allOnlineUser.AllUser[i].Name == name {
-			return allOnlineUser.AllUser[i].Loc
+		if allOnlineFriend.AllUser[i].Name == name {
+			return allOnlineFriend.AllUser[i].Loc
 		}
 	}
 	return nil
 }
 
 func InsertWsChatConnData(name string, ws *websocket.Conn) {
-	size := len(allOnlineUser.AllUser)
+	size := len(allOnlineFriend.AllUser)
 
 	for i := 0; i < size; i++ {
-		if allOnlineUser.AllUser[i].Name == name {
-			allOnlineUser.AllUser[i].wsChatConn = ws
+		if allOnlineFriend.AllUser[i].Name == name {
+			allOnlineFriend.AllUser[i].wsChatConn = ws
 			onlineUsersRefresh <- true
 			return
 		}
 	}
 }
 
-func InsertWsOnlineUserConnData(name string, ws *websocket.Conn) {
-	size := len(allOnlineUser.AllUser)
+func InsertWsOnlineFriendConnData(name string, ws *websocket.Conn) {
+	size := len(allOnlineFriend.AllUser)
 
 	for i := 0; i < size; i++ {
-		if allOnlineUser.AllUser[i].Name == name {
-			allOnlineUser.AllUser[i].wsOnlineUserConn= ws
+		if allOnlineFriend.AllUser[i].Name == name {
+			allOnlineFriend.AllUser[i].wsOnlineFriendConn= ws
 			onlineUsersRefresh <- true
 			return
 		}
 	}
 }
 
-func UpdateOnlineUsers(){
+func UpdateOnlineFriends(){
 		<-onlineUsersRefresh
-		size := len(allOnlineUser.AllUser)
+		size := len(allOnlineFriend.AllUser)
 		for i:=0; i<size; i++{
-				ws := allOnlineUser.AllUser[i].wsOnlineUserConn
+				ws := allOnlineFriend.AllUser[i].wsOnlineFriendConn
 				if nil == ws{
 						continue
 				}
@@ -77,21 +77,21 @@ func UpdateOnlineUsers(){
 }
 
 func GetConnByName(name string) *websocket.Conn {
-	size := len(allOnlineUser.AllUser)
+	size := len(allOnlineFriend.AllUser)
 
 	for i := 0; i < size; i++ {
-		if allOnlineUser.AllUser[i].Name == name {
-			return allOnlineUser.AllUser[i].wsChatConn
+		if allOnlineFriend.AllUser[i].Name == name {
+			return allOnlineFriend.AllUser[i].wsChatConn
 		}
 	}
 
 	return nil
 }
 
-func AddOnlineUser(username string, pw string, lat float64, lng float64){
+func AddOnlineFriend(username string, pw string, lat float64, lng float64){
 		loc := Location{Latitude: lat, Longitude: lng}
-		onlineUser := OnlineUser{Name: username, Loc: &loc}
-		allOnlineUser.AllUser = append(allOnlineUser.AllUser, &onlineUser)
+		onlineUser := OnlineFriend{Name: username, Loc: &loc}
+		allOnlineFriend.AllUser = append(allOnlineFriend.AllUser, &onlineUser)
 		onlineUsersRefresh <- true
 }
 
