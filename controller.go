@@ -23,6 +23,8 @@ func router(rw http.ResponseWriter, req *http.Request) {
 	onlineFriendsURL := "/onlineFriends"
 	routeToFriendURL := "/routeToFriend"
 	chatURL := "/chat"
+	wsOnlineFriendsURL := "/wsOnlineFriends"
+	wsChatURL := "/wsChat"
 
 	urlPath := req.URL.Path
 	log.Println(urlPath)
@@ -39,13 +41,18 @@ func router(rw http.ResponseWriter, req *http.Request) {
 			routeToFriendGet(rw, req)
 		case strings.HasPrefix(urlPath, chatURL):
 			chatGet(rw, req)
-		default:
+		case rootPathURL == urlPath || loginURL == urlPath:
 			loginGet(rw, req)
-			//notFoundHandler(rw, req)
+		case wsOnlineFriendsURL == urlPath:
+			websocket.Handler(wsOnlineFriends).ServeHTTP(rw, req)
+		case wsChatURL == urlPath:
+			websocket.Handler(wsChat).ServeHTTP(rw, req)
+		default:
+			notFoundHandler(rw, req)
 		}
 	case "POST":
 		switch {
-		case strings.HasPrefix(urlPath, rootPathURL) || strings.HasPrefix(urlPath, loginURL):
+		case rootPathURL == urlPath || loginURL == urlPath:
 				loginPost(rw, req)
 		case strings.HasPrefix(urlPath, registerURL):
 				registerPost(rw, req)
@@ -56,8 +63,8 @@ func router(rw http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
-	http.Handle("/wsOnlineFriends", websocket.Handler(wsOnlineFriends))
-	http.Handle("/wsChat", websocket.Handler(wsChat))
+	//http.Handle("/wsOnlineFriends", websocket.Handler(wsOnlineFriends))
+	//http.Handle("/wsChat", websocket.Handler(wsChat))
 
 	fmt.Println("listen on port 8888")
 

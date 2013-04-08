@@ -7,7 +7,6 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"net/url"
 )
 
 func notFoundHandler(w http.ResponseWriter, r *http.Request) {
@@ -34,9 +33,9 @@ func registerGet(w http.ResponseWriter, r *http.Request) {
 func loginGet(w http.ResponseWriter, r *http.Request) {
 	log.Println("loginGet")
 	r.ParseForm()
-	if name,pw,err := CheckCookie(r); err == nil{
-			log.Println(name)
-			http.PostForm("http://localhost:8888/login",url.Values{"username":{name}, "password":{pw}})
+	if _,_,err:= CheckCookie(r); err == nil{
+			url := "/onlineFriends"
+			http.Redirect(w, r, url, http.StatusFound)
 			return
 	}else{
 			log.Println(err)
@@ -51,13 +50,13 @@ func loginGet(w http.ResponseWriter, r *http.Request) {
 func onlineFriendsGet(w http.ResponseWriter, r *http.Request) {
 	log.Println("onlineFriendsGet")
 	r.ParseForm()
-	//who := r.Form.Get("who")
-	if name,pw,err := CheckCookie(r); err == nil{
-			log.Println(name)
-			http.PostForm("/login",url.Values{"username":{name}, "password":{pw}})
-			return
+	if name,pw,err:= CheckCookie(r); err == nil{
+			AddOnlineFriend(name, pw, 0, 0)
 	}else{
+			url := "/login"
+			http.Redirect(w, r, url, http.StatusFound)
 			log.Println(err)
+			return
 	}
 
 	t, err := template.ParseFiles("templates/html/onlineFriends.html")
@@ -69,16 +68,16 @@ func onlineFriendsGet(w http.ResponseWriter, r *http.Request) {
 func chatGet(w http.ResponseWriter, r *http.Request) {
 	log.Println("chat")
 	r.ParseForm()
+	withWho := r.Form.Get("withWho")
 
-	if name, pw,err := CheckCookie(r); err == nil{
-			log.Println(name)
-			http.PostForm("/login",url.Values{"username":{name}, "password":{pw}})
+	if _, _,err := CheckCookie(r); err != nil || "" == withWho{
+			url := "/onlineFriends"
+			http.Redirect(w, r, url, http.StatusFound)
 			return
 	}else{
 			log.Println(err)
 	}
 
-	withWho := r.Form.Get("withWho")
 	type ToWho struct {
 		Name string
 	}
@@ -86,6 +85,7 @@ func chatGet(w http.ResponseWriter, r *http.Request) {
 
 	t, err := template.ParseFiles("templates/html/chat.html")
 	CheckError(err)
+	//w.Header().Add("Content-type", "application/x-javascript")
 	err = t.Execute(w, toWho)
 	CheckError(err)
 }
@@ -93,9 +93,9 @@ func chatGet(w http.ResponseWriter, r *http.Request) {
 func routeToFriendGet(w http.ResponseWriter, r *http.Request) {
 	log.Println("routeToFriendGet")
 	r.ParseForm()
-	if name, pw,err := CheckCookie(r); err == nil{
-			log.Println(name)
-			http.PostForm("localhost:8888/login",url.Values{"username":{name}, "password":{pw}})
+	if _,_,err := CheckCookie(r); err == nil{
+			url := "/onlineFriends"
+			http.Redirect(w, r, url, http.StatusFound)
 			return
 	}else{
 			log.Println(err)
@@ -149,25 +149,20 @@ func wsOnlineFriends(ws *websocket.Conn){
 
 		req := ws.Request()
 		if name,_, err := CheckCookie(req); err == nil{
-			log.Println(name)
-			InsertWsOnlineFriendConnData(name, ws)
+				log.Println(name)
+				InsertWsChatConnData(name, ws)
 		}else{
+				log.Println(name)
 				log.Println(err)
 				return
 		}
-
-		//	var err error
 		var rcvMsg string
 		for{
-				time.Sleep(5000)
+				time.Sleep(10000)
 				if err := websocket.Message.Receive(ws, &rcvMsg); err != nil{
-					log.Println(err)
-					break
-			}
-			//if err = websocket.Message.Send(ws, "Y"); err != nil {
-				//		log.Println(err)
-				//		break
-				//}
+						log.Println(err)
+						break
+				}
 		}
 }
 
@@ -212,7 +207,7 @@ func loginPost(w http.ResponseWriter, r *http.Request) {
 	if CheckUserPassword(username, password) {
 			SetCookie(w, username, password)
 			AddOnlineFriend(username, password, lat, lng)
-			url := "/onlineFriends?who=" + username
+			url := "/onlineFriends"
 			http.Redirect(w, r, url, http.StatusFound)
 	} else {
 			SetCookie(w, "", "")
