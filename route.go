@@ -150,9 +150,8 @@ func wsOnlineFriends(ws *websocket.Conn){
 		req := ws.Request()
 		if name,_, err := CheckCookie(req); err == nil{
 				log.Println(name)
-				InsertWsChatConnData(name, ws)
+				InsertWsOnlineFriendConnData(name, ws)
 		}else{
-				log.Println(name)
 				log.Println(err)
 				return
 		}

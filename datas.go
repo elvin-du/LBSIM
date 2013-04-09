@@ -43,35 +43,44 @@ func InsertWsChatConnData(name string, ws *websocket.Conn) {
 	for i := 0; i < size; i++ {
 		if allOnlineFriend.AllUser[i].Name == name {
 			allOnlineFriend.AllUser[i].wsChatConn = ws
-			onlineUsersRefresh <- true
 			return
 		}
 	}
 }
 
 func InsertWsOnlineFriendConnData(name string, ws *websocket.Conn) {
+	log.Println("InsertWsOnlineFriendConnData")
 	size := len(allOnlineFriend.AllUser)
 
 	for i := 0; i < size; i++ {
 		if allOnlineFriend.AllUser[i].Name == name {
+			if nil == allOnlineFriend.AllUser[i].wsOnlineFriendConn{
+					log.Println("onlineUsersRefresh<-name")
+					onlineUsersRefresh <- name
+			}
 			allOnlineFriend.AllUser[i].wsOnlineFriendConn= ws
-			onlineUsersRefresh <- true
 			return
 		}
 	}
 }
 
-func UpdateOnlineFriends(){
-		<-onlineUsersRefresh
-		size := len(allOnlineFriend.AllUser)
-		for i:=0; i<size; i++{
-				ws := allOnlineFriend.AllUser[i].wsOnlineFriendConn
-				if nil == ws{
-						continue
-				}
-				if err := websocket.Message.Send(ws, "Y"); err != nil {
-						log.Println(err)
-						continue
+func observeOnlineFriends(){
+		for{
+				name :=<-onlineUsersRefresh
+				log.Println("observeOnlineFriends", name)
+				size := len(allOnlineFriend.AllUser)
+				for i:=0; i<size; i++{
+						ws := allOnlineFriend.AllUser[i].wsOnlineFriendConn
+						if allOnlineFriend.AllUser[i].Name == name{
+								continue
+						}
+						if nil == ws{
+								continue
+						}
+						if err := websocket.Message.Send(ws, "Y"); err != nil {
+								log.Println(err)
+								continue
+						}
 				}
 		}
 }
@@ -89,10 +98,17 @@ func GetConnByName(name string) *websocket.Conn {
 }
 
 func AddOnlineFriend(username string, pw string, lat float64, lng float64){
+		for i := 0; i <len(allOnlineFriend.AllUser); i++{
+				if allOnlineFriend.AllUser[i].Name == username{
+					allOnlineFriend.AllUser[i].Loc.Latitude = lat
+					allOnlineFriend.AllUser[i].Loc.Longitude = lng
+					return
+				}
+		}
+
 		loc := Location{Latitude: lat, Longitude: lng}
 		onlineUser := OnlineFriend{Name: username, Loc: &loc}
 		allOnlineFriend.AllUser = append(allOnlineFriend.AllUser, &onlineUser)
-		onlineUsersRefresh <- true
 }
 
 func AddUser(username string, password string, pwConfirm string)error{

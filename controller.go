@@ -9,7 +9,7 @@ import (
 )
 
 var appName string = "LBSIM"
-var onlineUsersRefresh = make(chan bool, 100)
+var onlineUsersRefresh = make(chan string, 1)
 
 func init(){
 	//defer close(onlineUsersRefresh)
@@ -68,7 +68,7 @@ func main() {
 
 	fmt.Println("listen on port 8888")
 
-	go UpdateOnlineFriends()
+	go observeOnlineFriends()
 	if err := http.ListenAndServe(":8888", http.HandlerFunc(router)); err != nil {
 		log.Fatal("ListenAndServe:", err)
 	}
