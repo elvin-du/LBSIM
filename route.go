@@ -50,8 +50,8 @@ func loginGet(w http.ResponseWriter, r *http.Request) {
 func onlineFriendsGet(w http.ResponseWriter, r *http.Request) {
 	log.Println("onlineFriendsGet")
 	r.ParseForm()
-	if name,pw,err:= CheckCookie(r); err == nil{
-			AddOnlineFriend(name, pw, 0, 0)
+	if name,_,err:= CheckCookie(r); err == nil{
+			AddOnlineFriend(name, 0, 0)
 	}else{
 			url := "/login"
 			http.Redirect(w, r, url, http.StatusFound)
@@ -93,7 +93,9 @@ func chatGet(w http.ResponseWriter, r *http.Request) {
 func routeToFriendGet(w http.ResponseWriter, r *http.Request) {
 	log.Println("routeToFriendGet")
 	r.ParseForm()
-	if _,_,err := CheckCookie(r); err == nil{
+
+	withWho := r.Form.Get("withWho")
+	if _, _,err := CheckCookie(r); err != nil || "" == withWho{
 			url := "/onlineFriends"
 			http.Redirect(w, r, url, http.StatusFound)
 			return
@@ -104,9 +106,7 @@ func routeToFriendGet(w http.ResponseWriter, r *http.Request) {
 	t, err := template.ParseFiles("templates/html/route.html")
 	CheckError(err)
 
-	withWho := r.Form.Get("withWho")
 	loc := FindLocByName(withWho)
-	//log.Println(loc.Longitude, loc.Latitude)
 	end := Location{Longitude: loc.Longitude, Latitude: loc.Latitude}
 	err = t.Execute(w, end)
 	CheckError(err)
@@ -198,14 +198,10 @@ func loginPost(w http.ResponseWriter, r *http.Request) {
 	var data interface{}
 	username := r.FormValue("username")
 	password := r.FormValue("password")
-	lat, _ := strconv.ParseFloat(r.FormValue("latitude"), 64)
-	lng, _ := strconv.ParseFloat(r.FormValue("longitude"), 64)
-	//log.Println(lat)
-	//log.Println(lng)
 
 	if CheckUserPassword(username, password) {
 			SetCookie(w, username, password)
-			AddOnlineFriend(username, password, lat, lng)
+			AddOnlineFriend(username, 0, 0)
 			url := "/onlineFriends"
 			http.Redirect(w, r, url, http.StatusFound)
 	} else {
@@ -214,7 +210,6 @@ func loginPost(w http.ResponseWriter, r *http.Request) {
 					LoginRet string
 			}
 			data = loginRet{"wrongUsrPw"}
-			//log.Println("suername or password is wrong, please input again!")
 	}
 
 	t, _ := template.ParseFiles("templates/html/login.html")
@@ -225,6 +220,11 @@ func onlineFriendsPost(w http.ResponseWriter, r *http.Request) {
 	log.Println("onlineFriendsPost")
 	r.ParseForm()
 
+	lat, _ := strconv.ParseFloat(r.FormValue("latitude"), 64)
+	lng, _ := strconv.ParseFloat(r.FormValue("longitude"), 64)
+	if name,_, err := CheckCookie(r); err == nil{
+			AddOnlineFriend(name,lat,lng)
+	}
 	withWho := r.FormValue("onlineUser")
 	chatOrRoute := r.FormValue("chatOrRoute")
 	var urlWithWho string

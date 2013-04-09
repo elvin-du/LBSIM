@@ -27,6 +27,9 @@ function calcRoute() {
 			destination: end,
 			travelMode: google.maps.TravelMode.DRIVING
 		};
+
+		directionsDisplay = new google.maps.DirectionsRenderer();
+		directionsDisplay.setMap(gmap);
 		directionsService.route(request, function(result, status) {
 						if (status == google.maps.DirectionsStatus.OK) {
 						directionsDisplay.setDirections(result);}
@@ -36,8 +39,6 @@ function calcRoute() {
 function savePosition(position){
 		localLng = position.coords.longitude;
 		localLat = position.coords.latitude;
-
-		directionsDisplay = new google.maps.DirectionsRenderer();
 		var local = new google.maps.LatLng(localLat, localLng);
 		var mapOptions = {
 		center: local, 
@@ -46,12 +47,6 @@ function savePosition(position){
 		};
 
 		gmap = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
-		directionsDisplay.setMap(gmap);
-
-		var gmarker = new google.maps.Marker({
-		position: local,
-		map: gmap
-		});			
 }
 
 function getLocation(){

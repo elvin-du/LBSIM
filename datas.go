@@ -97,7 +97,7 @@ func GetConnByName(name string) *websocket.Conn {
 	return nil
 }
 
-func AddOnlineFriend(username string, pw string, lat float64, lng float64){
+func AddOnlineFriend(username string, lat float64, lng float64){
 		for i := 0; i <len(allOnlineFriend.AllUser); i++{
 				if allOnlineFriend.AllUser[i].Name == username{
 					allOnlineFriend.AllUser[i].Loc.Latitude = lat
