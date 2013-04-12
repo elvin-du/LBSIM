@@ -8,23 +8,23 @@ function getLocation(){
 				alert("password or username is wrong,please input again");
 		}
 };	
-
-function register(){
-		window.location.href="/register";
-};
-
 </script>
+<style type="text/css">
+body {text-align:center}
+body a{text-decoration:none;position:absolute; top:80%; padding:0.5em 2em 0.5em 2em;background-color:blue;color:white}
+#inputlogin{padding:0.5em 2em 0.5em 2em;background-color:blue;color:white}
+</style>
 </head>
 <body onload="getLocation()">
-		<form  align="center" action="/login" method="POST" name="loginForm">
+		<form  action="/login" method="POST" name="loginForm">
 		UserName: <input size="50" name="username" type="text" />
 		<br/>
 		Password: <input size="50" name="password" type="password" />
 		<br/>
-		<input style="height:25px; width:100px" type="submit" value="Login"/>
+		<input id="inputlogin" type="submit" value="Login"/>
 		<br/>
 		</form>
 
-		<button type="button" onclick="register();">register</button>
+		<a href="/register">register</a>
 </body>
 </html>
