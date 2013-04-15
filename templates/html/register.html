@@ -1,0 +1,42 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>	LBSIM Register</title>
+<script type="text/javascript">
+function init(){
+		this.registerForm.username.value = "";
+		this.registerForm.password.value = "";
+		this.registerForm.passwordConfirm.value= "";
+		
+		if ( "registerSuccessful" == {{.RegisterResult}}){
+				alert({{.RegisterReturnMsg}});	
+				window.location.href = "/login";
+		}else if ("registerFailed" == {{.RegisterResult}}){
+				alert({{.RegisterReturnMsg}});	
+		}
+};
+
+function register(){
+		var psw = this.registerForm.password.value ;
+		var pswConfirm = this.registerForm.passwordConfirm.value;
+		if ( psw != pswConfirm ){
+				alert("input password is different!");
+				this.registerForm.password.value = "";
+			   	this.registerForm.passwordConfirm.value= "";
+		}else if(psw =="" && pswConfirm == ""){
+				alert("password can not be empty");
+		}else{
+				this.registerForm.submit();
+		}
+}
+</script>
+</head>
+<body onload="init();"> 
+		<form  align="center" action="/register" method="POST" name="registerForm">
+		UserName: <input size="50" name="username" type="text" /><br/>
+		Password: <input size="50" name="password" type="password" /><br/>
+		Password: <input size="50" name="passwordConfirm" type="password"/><br/>
+		<input style="height:25px; width:100px" type="button" value="Register" onclick="register();"/>
+		</form>
+</body>
+</html>
