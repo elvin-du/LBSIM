@@ -2,7 +2,6 @@ package main
 
 import (
 	"code.google.com/p/go.net/websocket"
-	"strconv"
 	"time"
 	"html/template"
 	"log"
@@ -34,7 +33,7 @@ func loginGet(w http.ResponseWriter, r *http.Request) {
 	log.Println("loginGet")
 	r.ParseForm()
 	if _,_,err:= CheckCookie(r); err == nil{
-			url := "/onlineFriends"
+			url := "/main"
 			http.Redirect(w, r, url, http.StatusFound)
 			return
 	}else{
@@ -47,7 +46,7 @@ func loginGet(w http.ResponseWriter, r *http.Request) {
 	CheckError(err)
 }
 
-func onlineFriendsGet(w http.ResponseWriter, r *http.Request) {
+func mainGet(w http.ResponseWriter, r *http.Request) {
 	log.Println("onlineFriendsGet")
 	r.ParseForm()
 	if name,_,err:= CheckCookie(r); err == nil{
@@ -59,56 +58,9 @@ func onlineFriendsGet(w http.ResponseWriter, r *http.Request) {
 			return
 	}
 
-	t, err := template.ParseFiles("templates/html/onlineFriends.html")
+	t, err := template.ParseFiles("templates/html/main.html")
 	CheckError(err)
 	err = t.Execute(w, allOnlineFriend)
-	CheckError(err)
-}
-
-func chatGet(w http.ResponseWriter, r *http.Request) {
-	log.Println("chat")
-	r.ParseForm()
-	withWho := r.Form.Get("withWho")
-
-	if _, _,err := CheckCookie(r); err != nil || "" == withWho{
-			url := "/onlineFriends"
-			http.Redirect(w, r, url, http.StatusFound)
-			return
-	}else{
-			log.Println(err)
-	}
-
-	type ToWho struct {
-		Name string
-	}
-	toWho := ToWho{Name: withWho}
-
-	t, err := template.ParseFiles("templates/html/chat.html")
-	CheckError(err)
-	//w.Header().Add("Content-type", "application/x-javascript")
-	err = t.Execute(w, toWho)
-	CheckError(err)
-}
-
-func routeToFriendGet(w http.ResponseWriter, r *http.Request) {
-	log.Println("routeToFriendGet")
-	r.ParseForm()
-
-	withWho := r.Form.Get("withWho")
-	if _, _,err := CheckCookie(r); err != nil || "" == withWho{
-			url := "/onlineFriends"
-			http.Redirect(w, r, url, http.StatusFound)
-			return
-	}else{
-			log.Println(err)
-	}
-
-	t, err := template.ParseFiles("templates/html/route.html")
-	CheckError(err)
-
-	loc := FindLocByName(withWho)
-	end := Location{Longitude: loc.Longitude, Latitude: loc.Latitude}
-	err = t.Execute(w, end)
 	CheckError(err)
 }
 
@@ -202,7 +154,7 @@ func loginPost(w http.ResponseWriter, r *http.Request) {
 	if CheckUserPassword(username, password) {
 			SetCookie(w, username, password)
 			AddOnlineFriend(username, 0, 0)
-			url := "/onlineFriends"
+			url := "/main"
 			http.Redirect(w, r, url, http.StatusFound)
 	} else {
 			SetCookie(w, "", "")
@@ -214,24 +166,4 @@ func loginPost(w http.ResponseWriter, r *http.Request) {
 
 	t, _ := template.ParseFiles("templates/html/login.html")
 	t.Execute(w, data)
-}
-
-func onlineFriendsPost(w http.ResponseWriter, r *http.Request) {
-	log.Println("onlineFriendsPost")
-	r.ParseForm()
-
-	lat, _ := strconv.ParseFloat(r.FormValue("latitude"), 64)
-	lng, _ := strconv.ParseFloat(r.FormValue("longitude"), 64)
-	if name,_, err := CheckCookie(r); err == nil{
-			AddOnlineFriend(name,lat,lng)
-	}
-	withWho := r.FormValue("onlineUser")
-	chatOrRoute := r.FormValue("chatOrRoute")
-	var urlWithWho string
-	if "chat" == chatOrRoute {
-			urlWithWho = "/chat?withWho=" + withWho
-	} else if "route" == chatOrRoute {
-			urlWithWho = "/routeToFriend?withWho=" + withWho
-	}
-	http.Redirect(w, r, urlWithWho, http.StatusFound)
 }
