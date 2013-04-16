@@ -5,19 +5,20 @@ body
 }
 #tabContainer ul
 {
-	float:left;
 	width:100%;
-	text-align:center;
-	background-color:LightSlateBlue;
-	color:white;
-	padding-top:5px;
-	padding-bottom:5px;
 }
 #tabContainer ul li
 {
-		width:25%;
+	text-align:center;
+	background-color:LightSlateBlue;
+	color:white;
+	float:left;
+	width:25%;
+	padding-top:5px;
+	padding-bottom:5px;
 }
-ul li
+
+#onlineContainer li
 {
 		list-style-type:none;
 		border-style:none none solid none;
