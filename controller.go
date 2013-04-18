@@ -49,9 +49,9 @@ func router(rw http.ResponseWriter, req *http.Request) {
 	case "POST":
 		switch {
 		case rootPathURL == urlPath || loginURL == urlPath:
-				loginPost(rw, req)
+			loginPost(rw, req)
 		case strings.HasPrefix(urlPath, registerURL):
-				registerPost(rw, req)
+			registerPost(rw, req)
 		}
 	}
 }
