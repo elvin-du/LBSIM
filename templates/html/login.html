@@ -1,30 +1,105 @@
 <!DOCTYPE HTML>
 <html>
-<head>
-<title>	LBSIM Login	</title>
-<script type="text/javascript">
-function getLocation(){
-		if("wrongUsrPw" == {{.LoginRet}}){
-				alert("password or username is wrong,please input again");
-		}
-};	
-</script>
-<style type="text/css">
-body {text-align:center}
-body a{text-decoration:none;position:absolute; top:80%; padding:0.5em 2em 0.5em 2em;background-color:blue;color:white}
-#inputlogin{padding:0.5em 2em 0.5em 2em;background-color:blue;color:white}
-</style>
-</head>
-<body onload="getLocation()">
-		<form  action="/login" method="POST" name="loginForm">
-		UserName: <input size="50" name="username" type="text" />
-		<br/>
-		Password: <input size="50" name="password" type="password" />
-		<br/>
-		<input id="inputlogin" type="submit" value="Login"/>
-		<br/>
-		</form>
+	<head>
+		<meta charset="gb2312"/>
+		<meta name="viewport" content="width=device-width,initial-scale=1">
+		<link rel="stylesheet" href="http://code.jquery.com/mobile/1.3.0/jquery.mobile-1.3.0.min.css" />
+		<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+		<script src="http://code.jquery.com/mobile/1.3.0/jquery.mobile-1.3.0.min.js"></script>
+		<script type="text/javascript">
+			function login(){
+				var name = $("#user-name-login").val();
+				var pw = $("#password-login").val();
+				if( (name =='') || (pw =='')){
+					$("#up-empty").popup();
+					$("#up-empty").popup('open');
+					return false;
+				}
 
-		<a href="/register">register</a>
-</body>
+				var loginForm = document.getElementById("login-form");
+				loginForm.submit();
+			};
+			
+			function register(){
+				var name = $("#user-name-register").val();
+				var pw = $("#password-register").val();
+				var confirmPw = $("#confirm-password-register").val();
+				if((name =='') || (pw =='')|| (confirmPw=='')){
+					$("#up-empty").popup();
+					$("#up-empty").popup('open');
+					return false;
+				}else if( pw != confirmPw ){
+					$("#passwor-different").popup();
+					$("#passwor-different").popup('open');
+					return false;
+				}
+
+				var registerForm = document.getElementById("register-form");
+				registerForm.submit();
+			};
+			
+		</script>
+	</head>
+	<body>
+		<div data-role="page" id="login-page">
+			<div data-theme="a" data-role="header" data-position="fixed">
+				<h3>
+					LOGIN
+				</h3>
+			</div>
+			<div data-role="content">
+				<form id="login-form" action="/login" method="POST">
+					<div data-role="fieldcontain">
+						<input name="user-name-login" id="user-name-login" placeholder="username" type="text">
+					</div>
+					<div data-role="fieldcontain">
+						<input name="password-login" id="password-login" placeholder="password" type="text">
+					</div> 
+				</form>
+			</div>
+			<div data-theme="c" data-role="footer" data-position="fixed">
+				<div class="ui-grid-a"> 
+					<div class="ui-block-a">
+						<button data-theme="b" onclick="login();">Login</button>
+					</div>
+					<div class="ui-block-b">
+						<a data-role="button" href="#register-page" data-theme="b" >Register</a>
+					</div>
+				</div> 
+			</div>
+		</div>
+
+		<div data-role="popup" id="up-empty" class="ui-content" data-theme="e" style="max-width:350px;">
+			<p>username or password is empty<p>
+		</div>
+
+		
+		<div data-role="popup" id="passwor-different" class="ui-content" data-theme="e" style="max-width:350px;">
+			<p>password and confirm password is no same!<p>
+		</div>
+
+		<div data-role="page" id="register-page">
+			<div data-theme="a" data-role="header" data-position="fixed">
+				<h3>
+					REGISTER	
+				</h3>
+			</div>
+			<div data-role="content">
+				<form id="register-form" action="/register" method="POST">
+					<div data-role="fieldcontain">
+						<input name="user-name-register" id="user-name-register" placeholder="username" type="text">
+					</div>
+					<div data-role="fieldcontain">
+						<input name="password-register" id="password-register" placeholder="password" type="text">
+					</div> 
+					<div data-role="fieldcontain">
+						<input name="confirm-password-register" id="confirm-password-register" placeholder="confirm password" type="text">
+					</div>
+				</form>
+			</div>
+			<div data-theme="c" data-role="footer" data-position="fixed">
+				<button data-inline="false" data-theme="b" onclick="register();">Login</button>
+			</div>
+		</div>
+	</body>
 </html>

@@ -1,52 +1,17 @@
 <html>
 	<head>
 		<meta charset="gb2312"/>
+		<link rel="stylesheet" href="http://code.jquery.com/mobile/1.3.0/jquery.mobile-1.3.0.min.css" />
+		<link rel="stylesheet" type="text/css" href="templates/css/main.css"></link>
+		<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+		<script src="http://code.jquery.com/mobile/1.3.0/jquery.mobile-1.3.0.min.js"></script>
 		<script src="templates/js/main.js"></script>
 		<script src="templates/js/route.js"></script>
 		<script src="templates/js/online.js"></script>
 		<script src="templates/js/chat.js"></script>
 		<script src="http://maps.googleapis.com/maps/api/js?key=AIzaSyCUrsdVrY0c5EIqkrbfI0YduQlFfTG-n18&sensor=true"></script>
-		<script type="text/javascript" src="http://img3.douban.com/js/packed_jquery.min6301986802.js"></script>
-		<link rel="stylesheet" type="text/css" href="templates/css/main.css"></link>
 	</head>
 	<body onload="mainInit();chatInit();routeInit();onlineInit();">
-		<div id="tabContainer">
-			<ul>
-				<li id="tabChat" name="tab">chat</li>
-				<li id="tabOnline" name="tab" style="background-color:MediumBlue;" >online</li>
-				<li id="tabRoute" name="tab">route</li>
-			</ul>
-		</div>
-		<div id="contentContainer">
-			<div id="menuOnline" name="menuContent">
-				<form action="/onlineFriends" method="POST" name="onlineFriendsForm">
-					<ul id="onlineContainer">
-						{{with .AllUser}}
-						{{range .}}
-						<li name="online">
-						<ul id="line">
-							<li style="float:left;width:80%;">
-							{{.Name}}
-							</li>
-							<li style="float:left;width:20%;background-color:green;">
-							chat
-							</li>
-						</ul>
-						</li>
-						{{end}}
-						{{end}}
-					</ul>
-				</form>
-			</div>
-			<div id="menuRoute" name="menuContent" style="display:none">
-				<div id="mapCanvas" style="width:100%; height:100%"></div>
-			</div>
-			<div id="menuChat" name="menuContent" style="display:none">
-				<div id="log"></div>
-				<div style="background-color:gray">
-					<input id="message" style="display:inline;width:95%;"type="text"><button onclick="send();">Send</button>
-				</div>
-			</div>
-		</div>
+	
 	</body>
 </html>
