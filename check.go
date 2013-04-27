@@ -4,7 +4,10 @@ import (
 	"log"
 	"net/http"
 	"database/sql"
+	"errors"
 	_"github.com/Go-SQL-Driver/MySQL"
+	"encoding/base64"
+	"strings"
 )
 
 func CheckUserPassword(user string, password string) bool {
@@ -34,19 +37,45 @@ func CheckUserPassword(user string, password string) bool {
 }
 
 func SetCookie(w http.ResponseWriter, user, pw string) {
-	cookie := http.Cookie{Name: appName, Value: user}
+	encryptedUsrpw := string(encrypt(user + ":" + pw))
+	cookie := http.Cookie{Name: appName, Value: encryptedUsrpw}
 	http.SetCookie(w, &cookie)
 }
 
-func CheckCookie(r *http.Request) (name ,pw string, err error){
+func base64Encode(src []byte) []byte {
+    return []byte(base64.StdEncoding.EncodeToString(src))
+}
+
+func base64Decode(src []byte) ([]byte, error) {
+    return base64.StdEncoding.DecodeString(string(src))
+}
+
+func encrypt(src string) []byte{
+	return base64Encode([]byte(src))
+}
+
+func decrypt(src string) ([]byte,error){
+	return base64Decode([]byte(src))
+}
+
+func CheckCookie(r *http.Request) (string,string,error){
+	var name, pw string
 	cookie, err := r.Cookie(appName)
 	if nil == err{
-			name = cookie.Value
-			pw = ""
-			//if "" == name{
-			//j		err = errors.New("the value of cookie is empty")
-		//	}
+		val,err := decrypt(cookie.Value)
+		namepw := string(val)
+		if "" == namepw{
+			err = errors.New("the value of cookie is empty")
+			return "","", err
+		}
+		index := strings.Index(namepw, ":")
+		name = namepw[:index]
+		pw = namepw[index+1:]
 	}
 
-	return
+	if(!CheckUserPassword(name,pw)){
+		return "","",errors.New("wrong password or username")
+	}
+
+	return name, pw, err
 }

@@ -20,7 +20,9 @@ func router(rw http.ResponseWriter, req *http.Request) {
 	registerURL := "/register"
 	loginURL := "/login"
 	rootPathURL := "/"
-	mainURL := "/main"
+	onlineURL := "/onlinefriends"
+	chatURL := "/chat"
+	routeURL := "/route"
 	wsOnlineFriendsURL := "/wsOnlineFriends"
 	wsChatURL := "/wsChat"
 
@@ -33,8 +35,12 @@ func router(rw http.ResponseWriter, req *http.Request) {
 			registerGet(rw, req)
 		case rootPathURL == urlPath || loginURL == urlPath:
 			loginGet(rw, req)
-		case strings.HasPrefix(urlPath, mainURL):
-			mainGet(rw, req)
+		case onlineURL == urlPath:
+			onlineFriendsGet(rw, req)
+		case routeURL == urlPath:
+			routeGet(rw, req)
+		case chatURL == urlPath:
+			chatGet(rw, req)
 		case wsOnlineFriendsURL == urlPath:
 			websocket.Handler(wsOnlineFriends).ServeHTTP(rw, req)
 		case wsChatURL == urlPath:
@@ -57,13 +63,10 @@ func router(rw http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
-	//http.Handle("/wsOnlineFriends", websocket.Handler(wsOnlineFriends))
-	//http.Handle("/wsChat", websocket.Handler(wsChat))
-
 	fmt.Println("listen on port 8888")
 
 	go observeOnlineFriends()
 	if err := http.ListenAndServe(":8888", http.HandlerFunc(router)); err != nil {
 		log.Fatal("ListenAndServe:", err)
 	}
-};
+}

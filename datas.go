@@ -98,17 +98,19 @@ func GetConnByName(name string) *websocket.Conn {
 }
 
 func AddOnlineFriend(username string, lat float64, lng float64){
-		for i := 0; i <len(allOnlineFriend.AllUser); i++{
-				if allOnlineFriend.AllUser[i].Name == username{
-					allOnlineFriend.AllUser[i].Loc.Latitude = lat
-					allOnlineFriend.AllUser[i].Loc.Longitude = lng
-					return
-				}
+	for i := 0; i <len(allOnlineFriend.AllUser); i++{
+		if allOnlineFriend.AllUser[i].Name == username{
+			if ( lat > 0) && (lng > 0){
+				allOnlineFriend.AllUser[i].Loc.Latitude = lat
+				allOnlineFriend.AllUser[i].Loc.Longitude = lng
+			}
+			return
 		}
+	}
 
-		loc := Location{Latitude: lat, Longitude: lng}
-		onlineUser := OnlineFriend{Name: username, Loc: &loc}
-		allOnlineFriend.AllUser = append(allOnlineFriend.AllUser, &onlineUser)
+	loc := Location{Latitude: lat, Longitude: lng}
+	onlineUser := OnlineFriend{Name: username, Loc: &loc}
+	allOnlineFriend.AllUser = append(allOnlineFriend.AllUser, &onlineUser)
 }
 
 func AddUser(username string, password string, pwConfirm string)error{

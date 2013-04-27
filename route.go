@@ -33,11 +33,11 @@ func loginGet(w http.ResponseWriter, r *http.Request) {
 	log.Println("loginGet")
 	r.ParseForm()
 	if _,_,err:= CheckCookie(r); err == nil{
-			url := "/main"
-			http.Redirect(w, r, url, http.StatusFound)
-			return
+		url := "/onlinefriends"
+		http.Redirect(w, r, url, http.StatusFound)
+		return
 	}else{
-			log.Println(err)
+		log.Println(err)
 	}
 
 	t, err := template.ParseFiles("templates/html/login.html")
@@ -46,21 +46,63 @@ func loginGet(w http.ResponseWriter, r *http.Request) {
 	CheckError(err)
 }
 
-func mainGet(w http.ResponseWriter, r *http.Request) {
+func onlineFriendsGet(w http.ResponseWriter, r *http.Request) {
 	log.Println("onlineFriendsGet")
 	r.ParseForm()
 	if name,_,err:= CheckCookie(r); err == nil{
-			AddOnlineFriend(name, 0, 0)
+		AddOnlineFriend(name, -1, -1)//-1 means that do not insert GPS data
 	}else{
-			url := "/login"
-			http.Redirect(w, r, url, http.StatusFound)
-			log.Println(err)
-			return
+		url := "/login"
+		http.Redirect(w, r, url, http.StatusFound)
+		log.Println(err)
+		return
 	}
 
-	t, err := template.ParseFiles("templates/html/main.html")
+	t, err := template.ParseFiles("templates/html/onlineFriends.html")
 	CheckError(err)
 	err = t.Execute(w, allOnlineFriend)
+	CheckError(err)
+}
+
+func routeGet(w http.ResponseWriter, r *http.Request) {
+	log.Println("routeGet")
+	r.ParseForm()
+	name,_,err:= CheckCookie(r)
+	if err == nil{
+		AddOnlineFriend(name, -1, -1)//-1 means that do not insert GPS data
+	}else{
+		url := "/login"
+		http.Redirect(w, r, url, http.StatusFound)
+		log.Println(err)
+		return
+	}
+	t, err := template.ParseFiles("templates/html/route.html")
+	CheckError(err)
+
+	end := Location{}
+	if withWho := r.Form.Get("withWho");withWho != ""{
+		loc := FindLocByName(withWho)//if no withWho, loc is empty
+		end = Location{Longitude: loc.Longitude, Latitude: loc.Latitude}
+	}
+	err = t.Execute(w, end)
+	CheckError(err)
+}
+
+func chatGet(w http.ResponseWriter, r *http.Request) {
+	log.Println("chatGet")
+	r.ParseForm()
+	if name,_,err:= CheckCookie(r); err == nil{
+		AddOnlineFriend(name, -1, -1)//-1 means that do not insert GPS data
+	}else{
+		url := "/login"
+		http.Redirect(w, r, url, http.StatusFound)
+		log.Println(err)
+		return
+	}
+
+	t, err := template.ParseFiles("templates/html/chat.html")
+	CheckError(err)
+	err = t.Execute(w, nil)
 	CheckError(err)
 }
 
@@ -69,11 +111,11 @@ func wsChat(ws *websocket.Conn) {
 
 	req := ws.Request()
 	if name,_, err := CheckCookie(req); err == nil{
-			log.Println(name)
-			InsertWsChatConnData(name, ws)
+		log.Println(name)
+		InsertWsChatConnData(name, ws)
 	}else{
-			log.Println(err)
-			return
+		log.Println(err)
+		return
 	}
 
 	var err error
@@ -97,24 +139,28 @@ func wsChat(ws *websocket.Conn) {
 }
 
 func wsOnlineFriends(ws *websocket.Conn){
-		log.Println("wsOnlineFriends")
+	log.Println("wsOnlineFriends")
 
-		req := ws.Request()
-		if name,_, err := CheckCookie(req); err == nil{
-				log.Println(name)
-				InsertWsOnlineFriendConnData(name, ws)
-		}else{
-				log.Println(err)
-				return
+	req := ws.Request()
+	var username string = ""
+	if username,_, err := CheckCookie(req); err == nil{
+		log.Println(username ," connected on websocket")
+		InsertWsOnlineFriendConnData(username, ws)
+	}else{
+		log.Println(err)
+		return
+	}
+	var rcvMsg string
+	for{
+		time.Sleep(10000)
+		if err := websocket.Message.Receive(ws, &rcvMsg); err != nil{
+			log.Println(err)
+			break
 		}
-		var rcvMsg string
-		for{
-				time.Sleep(10000)
-				if err := websocket.Message.Receive(ws, &rcvMsg); err != nil{
-						log.Println(err)
-						break
-				}
-		}
+		lng,lat,_:= ParseLngLat(rcvMsg)
+		AddOnlineFriend(username,lng,lat)
+		log.Println(username,lng,lat)
+	}
 }
 
 func registerPost(w http.ResponseWriter, r *http.Request) {
@@ -126,15 +172,15 @@ func registerPost(w http.ResponseWriter, r *http.Request) {
 		RegisterReturnMsg string
 	}
 
-	username := r.FormValue("username")
-	password := r.FormValue("password")
-	pwConfirm := r.FormValue("passwordConfirm")
+	username := r.FormValue("username-register")
+	password := r.FormValue("password-register")
+	pwConfirm := r.FormValue("passwordConfirm-register")
 	err := AddUser(username, password, pwConfirm)
 	if  nil != err {
-			log.Println(err)
-			regRet = reg{RegisterResult: "registerFailed", RegisterReturnMsg:err.Error()}
+		log.Println(err)
+		regRet = reg{RegisterResult: "registerFailed", RegisterReturnMsg:err.Error()}
 	}else{
-			regRet = reg{RegisterResult: "registerSuccessful", RegisterReturnMsg:"congratulation, register successfully"}
+		regRet = reg{RegisterResult: "registerSuccessful", RegisterReturnMsg:"congratulation, register successfully"}
 	}
 
 	t, err := template.ParseFiles("templates/html/register.html")
@@ -148,20 +194,21 @@ func loginPost(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 
 	var data interface{}
-	username := r.FormValue("username")
-	password := r.FormValue("password")
+	username := r.FormValue("username-login")
+	password := r.FormValue("password-login")
+	log.Println(username, ":", password)
 
 	if CheckUserPassword(username, password) {
-			SetCookie(w, username, password)
-			AddOnlineFriend(username, 0, 0)
-			url := "/main"
-			http.Redirect(w, r, url, http.StatusFound)
+		SetCookie(w, username, password)
+		AddOnlineFriend(username, -1, -1)//-1 means that do not insert GPS data
+		url := "/onlinefriends"
+		http.Redirect(w, r, url, http.StatusFound)
 	} else {
-			SetCookie(w, "", "")
-			type loginRet struct{
-					LoginRet string
-			}
-			data = loginRet{"wrongUsrPw"}
+		SetCookie(w, "", "")
+		type loginRet struct{
+			LoginRet string
+		}
+		data = loginRet{"wrongUsrPw"}
 	}
 
 	t, _ := template.ParseFiles("templates/html/login.html")

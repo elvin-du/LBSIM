@@ -9,19 +9,19 @@ function routeInit(){
 	getLocation();
 };
 
-function calcRoute() {
-		var start =  new google.maps.LatLng(localLat, localLng);
-		var endLat = 0;//{{.Latitude}}; 
-		var endLng = 0;//{{.Longitude}}; 
-		var end = new google.maps.LatLng(endLat, endLng);
-		var request = {
-			origin: start,
-			destination: end,
-			travelMode: google.maps.TravelMode.DRIVING
-		};
+function calcRoute(endLat, endLng) {
+	var start =  new google.maps.LatLng(localLat, localLng);
+	var endLat = endLat;//{{.Latitude}}; 
+	var endLng = endLng;//{{.Longitude}}; 
+	var end = new google.maps.LatLng(endLat, endLng);
+	var request = {
+		origin: start,
+		destination: end,
+		travelMode: google.maps.TravelMode.DRIVING
+	};
 
-		directionsService = google.maps.DirectionsService();
-		directionsService.route(request, showRoute);
+	directionsService = google.maps.DirectionsService();
+	directionsService.route(request, showRoute);
 };
 
 function showRoute(result,stat){
@@ -44,27 +44,27 @@ function showRoute(result,stat){
 };
 
 function savePosition(position){
-		localLng = position.coords.longitude;
-		localLat = position.coords.latitude;
-		var local = new google.maps.LatLng(localLat, localLng);
-		var mapOptions = {
+	localLng = position.coords.longitude;
+	localLat = position.coords.latitude;
+	var local = new google.maps.LatLng(localLat, localLng);
+	var mapOptions = {
 		center: local, 
 		zoom: 18,
 		mapTypeId: google.maps.MapTypeId.ROADMAP
-		};
-		
-		gmap = new google.maps.Map(document.getElementById("mapCanvas"), mapOptions);
-		if(!marker){
-				marker = new google.maps.Marker({position:local, map:gmap});
-		}else{
-				marker.setPosition(path[0]);
-		}
+	};
+
+	gmap = new google.maps.Map(document.getElementById("mapCanvas"), mapOptions);
+	if(!marker){
+		marker = new google.maps.Marker({position:local, map:gmap});
+	}else{
+		marker.setPosition(path[0]);
+	}
 };
 
 function getLocation(){
-		if (navigator.geolocation){
-				navigator.geolocation.getCurrentPosition(savePosition);
-		}else{
-				alert("The browser can not support geolocation");
-		}
+	if (navigator.geolocation){
+		navigator.geolocation.getCurrentPosition(savePosition);
+	}else{
+		alert("The browser can not support geolocation");
+	}
 };
