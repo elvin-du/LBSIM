@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="gb2312"/>
+		<link rel="stylesheet" href="http://code.jquery.com/mobile/1.3.0/jquery.mobile-1.3.0.min.css" />
+		<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+		<script src="http://code.jquery.com/mobile/1.3.0/jquery.mobile-1.3.0.min.js"></script>
+	</head>
+	<body>
+		<div data-role="page" id="chat-page">
+			<div data-theme="a" data-role="header" data-position="fixed">
+				<div data-role="navbar">
+					<ul>
+						<li><a href="chat" data-tap-toggle="false" class="ui-btn-active ui-state-persist">chat</a></li>
+						<li><a href="onlinefriends">online</a></li>
+						<li><a href="route">route</a></li>
+					</ul>
+				</div><!-- /navbar -->
+			</div>
+			
+			<div data-role="content">
+			</div>
+			<div data-theme="b" data-role="footer" data-position="fixed"> 
+				<textarea name="msg" id="msg"></textarea>
+				<button data-inline="false" data-theme="b" onclick="send();">Send</button>
+			</div>
+
+		</div>	
+	</body>
+</html>
