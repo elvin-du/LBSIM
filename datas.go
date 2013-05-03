@@ -18,6 +18,7 @@ type OnlineFriend struct {
 	Loc    *Location
 	wsChatConn *websocket.Conn
 	wsOnlineFriendConn *websocket.Conn
+	wsRoutConn *websocket.Conn
 }
 
 type AllOnlineFriend struct {
@@ -49,14 +50,14 @@ func InsertWsChatConnData(name string, ws *websocket.Conn) {
 }
 
 func InsertWsOnlineFriendConnData(name string, ws *websocket.Conn) {
-	log.Println("InsertWsOnlineFriendConnData")
+	log.Println("InsertWsOnlineFriendConnData()")
 	size := len(allOnlineFriend.AllUser)
 
 	for i := 0; i < size; i++ {
 		if allOnlineFriend.AllUser[i].Name == name {
 			if nil == allOnlineFriend.AllUser[i].wsOnlineFriendConn{
-					log.Println("onlineUsersRefresh<-name")
-					onlineUsersRefresh <- name
+				log.Println("onlineUsersRefresh<-name")
+				onlineUsersRefresh <- name
 			}
 			allOnlineFriend.AllUser[i].wsOnlineFriendConn= ws
 			return
@@ -65,24 +66,24 @@ func InsertWsOnlineFriendConnData(name string, ws *websocket.Conn) {
 }
 
 func observeOnlineFriends(){
-		for{
-				name :=<-onlineUsersRefresh
-				log.Println("observeOnlineFriends", name)
-				size := len(allOnlineFriend.AllUser)
-				for i:=0; i<size; i++{
-						ws := allOnlineFriend.AllUser[i].wsOnlineFriendConn
-						if allOnlineFriend.AllUser[i].Name == name{
-								continue
-						}
-						if nil == ws{
-								continue
-						}
-						if err := websocket.Message.Send(ws, "Y"); err != nil {
-								log.Println(err)
-								continue
-						}
-				}
+	for{
+		name :=<-onlineUsersRefresh
+		log.Println("observeOnlineFriends", name)
+		size := len(allOnlineFriend.AllUser)
+		for i:=0; i<size; i++{
+			ws := allOnlineFriend.AllUser[i].wsOnlineFriendConn
+			if allOnlineFriend.AllUser[i].Name == name{
+				continue
+			}
+			if nil == ws{
+				continue
+			}
+			if err := websocket.Message.Send(ws, "R"); err != nil {
+				log.Println(err)
+				continue
+			}
 		}
+	}
 }
 
 func GetConnByName(name string) *websocket.Conn {

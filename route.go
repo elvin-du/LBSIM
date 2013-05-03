@@ -79,11 +79,13 @@ func routeGet(w http.ResponseWriter, r *http.Request) {
 	t, err := template.ParseFiles("templates/html/route.html")
 	CheckError(err)
 
-	end := Location{}
-	if withWho := r.Form.Get("withWho");withWho != ""{
+	end := Location{-1,-1}
+	withWho := r.Form.Get("withwho")
+	if withWho != ""{
 		loc := FindLocByName(withWho)//if no withWho, loc is empty
 		end = Location{Longitude: loc.Longitude, Latitude: loc.Latitude}
 	}
+	log.Println(withWho, " is in lng:",end.Longitude,"lat:",end.Latitude)
 	err = t.Execute(w, end)
 	CheckError(err)
 }
@@ -100,28 +102,31 @@ func chatGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	type withwho struct{
+		Name string
+	}
+	who := r.Form.Get("withwho")
+
 	t, err := template.ParseFiles("templates/html/chat.html")
 	CheckError(err)
-	err = t.Execute(w, nil)
+	err = t.Execute(w, withwho{who})
 	CheckError(err)
 }
 
 func wsChat(ws *websocket.Conn) {
 	log.Println("wsChat")
-
 	req := ws.Request()
-	if name,_, err := CheckCookie(req); err == nil{
-		log.Println(name)
+	name,_, err := CheckCookie(req)
+	if err == nil{
+		log.Println(name,"connected by websocket")
 		InsertWsChatConnData(name, ws)
 	}else{
 		log.Println(err)
 		return
 	}
 
-	var err error
-	var toWho *websocket.Conn
+	var toWhoConn *websocket.Conn
 	var rcvMsg string
-
 	for {
 		if err = websocket.Message.Receive(ws, &rcvMsg); err != nil {
 			log.Println(err)
@@ -129,21 +134,24 @@ func wsChat(ws *websocket.Conn) {
 		}
 		log.Println("Received : " + rcvMsg)
 
-		name, content, err := ParseRcvMsg(rcvMsg)
-		toWho = GetConnByName(name)
-		if err = websocket.Message.Send(toWho, content); err != nil {
+		toWhoName, content, err := ParseRcvMsg(rcvMsg)
+		toWhoConn = GetConnByName(toWhoName)
+		content = name + ":" + content
+		if nil == toWhoConn{
+			continue
+		}
+		if err = websocket.Message.Send(toWhoConn, content); err != nil {
 			log.Println(err)
-			break
+			//break
 		}
 	}
 }
 
 func wsOnlineFriends(ws *websocket.Conn){
 	log.Println("wsOnlineFriends")
-
 	req := ws.Request()
-	var username string = ""
-	if username,_, err := CheckCookie(req); err == nil{
+	username,_, err := CheckCookie(req)
+	if err == nil{
 		log.Println(username ," connected on websocket")
 		InsertWsOnlineFriendConnData(username, ws)
 	}else{
@@ -161,6 +169,7 @@ func wsOnlineFriends(ws *websocket.Conn){
 		AddOnlineFriend(username,lng,lat)
 		log.Println(username,lng,lat)
 	}
+	//ws disconnected process
 }
 
 func registerPost(w http.ResponseWriter, r *http.Request) {

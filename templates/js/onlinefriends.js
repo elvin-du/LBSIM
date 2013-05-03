@@ -17,7 +17,7 @@ function wsInit(){
 	}
 	sock.onmessage = function(e){
 		console.log("message received:" + e.data);
-		if(e.data == "UO"){
+		if(e.data == "R"){
 			onlineFriendsRefresh();
 		}else{
 			$('#log').append('<p> others says: '+e.data+'</p>');

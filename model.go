@@ -14,7 +14,7 @@ func ParseRcvMsg(rcvMsg string) (name string, content string, err error) {
 		return "", "", errors.New("can not find :")
 	}
 	name = rcvMsg[:index]
-	content = rcvMsg[index:]
+	content = rcvMsg[index+1:]
 	return
 }
 
