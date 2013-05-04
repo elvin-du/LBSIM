@@ -119,7 +119,7 @@ func wsChat(ws *websocket.Conn) {
 	name,_, err := CheckCookie(req)
 	if err == nil{
 		log.Println(name,"connected by websocket")
-		InsertWsChatConnData(name, ws)
+		UpdateWsConn(name, "chat", ws)
 	}else{
 		log.Println(err)
 		return
@@ -153,7 +153,7 @@ func wsOnlineFriends(ws *websocket.Conn){
 	username,_, err := CheckCookie(req)
 	if err == nil{
 		log.Println(username ," connected on websocket")
-		InsertWsOnlineFriendConnData(username, ws)
+		UpdateWsConn(username,"online", ws)
 	}else{
 		log.Println(err)
 		return

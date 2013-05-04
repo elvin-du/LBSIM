@@ -23,6 +23,20 @@
 					$('#log').append('<p>' + fromWho + ' says: '+ content +'</p>');
 				}
 			};
+			function readStorage(){
+				var toWho = {{.Name}};
+				var storage = window.sessionStorage;
+				var len = storage.length;
+				for (var i=0; i < len; i++){
+					var key = storage.key(i);
+					var name = key.substr(0, key.indexOf("@")); 
+					var msgDate = key.substr(key.indexOf("@")+1);
+					if (toWho == name){
+						var content = storage.getItem(key);
+						$('#log').append('<p>' + toWho + '  ' + msgDate +' says: '+ content +'</p>');
+					}
+				}
+			};
 			function send(){
 				var ToWho = {{.Name}};
 				if ("" == ToWho){
@@ -39,14 +53,14 @@
 			};
 		</script>
 	</head>
-	<body onload="chatInit();">
+	<body onload="chatInit();readStorage();">
 		<div data-role="page" id="chat-page">
 			<div data-theme="a" data-role="header" data-position="fixed">
 				<div data-role="navbar">
 					<ul>
-						<li><a href='javascript:window.location="chat"'　data-tap-toggle="false" class="ui-btn-active ui-state-persist">chat</a></li>
-						<li><a href='javascript:window.location="onlinefriends"'>online</a></li>
-						<li><a href='javascript:window.location="route"'>route</a></li>
+						<li><a id="chatTab" href='javascript:window.location="chat"'　data-tap-toggle="false" class="ui-btn-active ui-state-persist">chat</a></li>
+						<li><a id="onlineTab" href='javascript:window.location="onlinefriends"'>online</a></li>
+						<li><a id="routeTab" href='javascript:window.location="route"'>route</a></li>
 					</ul>
 				</div><!-- /navbar -->
 			</div>

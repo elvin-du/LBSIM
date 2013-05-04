@@ -20,9 +20,23 @@ function wsInit(){
 		if(e.data == "R"){
 			onlineFriendsRefresh();
 		}else{
-			$('#log').append('<p> others says: '+e.data+'</p>');
+		//	$('#log').append('<p> others says: '+e.data+'</p>');
+			storeChatLog(e.data);
+			var name = e.data.substr(0, e.data.indexOf(":"));
+			name = "#" + name;
+			$(name).append('<span id=temp class="ui-li-count"></span>');
+			$('#temp').text("new");
+			$('#chatTab').buttonMarkup({icon:"info"});
 		}
 	}
+};
+
+function storeChatLog(msg){
+	var name = msg.substr(0, msg.indexOf(":"));
+	var content = msg.substr(msg.indexOf(":")+1);
+	var currentDate = new Date();
+	var strDate = currentDate.toString();
+	sessionStorage.setItem(name+"@"+strDate,content);
 };
 function onlineFriendsRefresh(){
 	window.location.reload();

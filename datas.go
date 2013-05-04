@@ -16,9 +16,8 @@ type Location struct {
 type OnlineFriend struct {
 	Name   string
 	Loc    *Location
-	wsChatConn *websocket.Conn
-	wsOnlineFriendConn *websocket.Conn
-	wsRoutConn *websocket.Conn
+	Page	string//determine parameter wsConn to connected which page 
+	wsConn *websocket.Conn
 }
 
 type AllOnlineFriend struct {
@@ -38,30 +37,26 @@ func FindLocByName(name string) *Location {
 	return nil
 }
 
-func InsertWsChatConnData(name string, ws *websocket.Conn) {
+func UpdateWsConn(name,page string, ws *websocket.Conn){
+	log.Println("UpdateWsConn()")
 	size := len(allOnlineFriend.AllUser)
-
 	for i := 0; i < size; i++ {
-		if allOnlineFriend.AllUser[i].Name == name {
-			allOnlineFriend.AllUser[i].wsChatConn = ws
-			return
+		//if do not match,jump to next
+		if allOnlineFriend.AllUser[i].Name != name {
+			continue
 		}
-	}
-}
 
-func InsertWsOnlineFriendConnData(name string, ws *websocket.Conn) {
-	log.Println("InsertWsOnlineFriendConnData()")
-	size := len(allOnlineFriend.AllUser)
-
-	for i := 0; i < size; i++ {
-		if allOnlineFriend.AllUser[i].Name == name {
-			if nil == allOnlineFriend.AllUser[i].wsOnlineFriendConn{
+		switch page{
+		case "route","chat":
+		case "online":
+			if nil == allOnlineFriend.AllUser[i].wsConn{
 				log.Println("onlineUsersRefresh<-name")
 				onlineUsersRefresh <- name
 			}
-			allOnlineFriend.AllUser[i].wsOnlineFriendConn= ws
-			return
 		}
+		allOnlineFriend.AllUser[i].Page = page
+		allOnlineFriend.AllUser[i].wsConn= ws
+		return
 	}
 }
 
@@ -71,7 +66,7 @@ func observeOnlineFriends(){
 		log.Println("observeOnlineFriends", name)
 		size := len(allOnlineFriend.AllUser)
 		for i:=0; i<size; i++{
-			ws := allOnlineFriend.AllUser[i].wsOnlineFriendConn
+			ws := allOnlineFriend.AllUser[i].wsConn
 			if allOnlineFriend.AllUser[i].Name == name{
 				continue
 			}
@@ -91,7 +86,7 @@ func GetConnByName(name string) *websocket.Conn {
 
 	for i := 0; i < size; i++ {
 		if allOnlineFriend.AllUser[i].Name == name {
-			return allOnlineFriend.AllUser[i].wsChatConn
+			return allOnlineFriend.AllUser[i].wsConn
 		}
 	}
 
