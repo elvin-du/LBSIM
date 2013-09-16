@@ -1,0 +1,54 @@
+{{define "css"}}
+{{end}}
+{{define "js"}}
+<script type="text/javascript">
+	function init(){
+		if("wrongUsrPw" == {{.LoginRet}}){
+			$("#usrpw-wrong").popup();
+			$("#usrpw-wrong").popup('open');
+		}
+	};
+	function login(){
+		var name = $("#username-login").val();
+		var pw = $("#password-login").val();
+		if( (name =='') || (pw =='')){
+			$("#usrpw-empty").popup();
+			$("#usrpw-empty").popup('open');
+			return false;
+		}
+		var loginForm = document.getElementById("login-form");
+		loginForm.submit();
+	};
+</script>
+{{end}}
+
+{{define "content"}}
+<div data-role="page" id="login-page">
+	<div data-theme="a" data-role="header" data-position="fixed">
+		<h3>用户登录</h3>
+	</div>
+	<div data-role="content">
+		<form id="login-form" action="account/login" method="POST">
+			<input name="username-login" id="username-login" placeholder="username" type="text">		
+			<input name="password-login" id="password-login" placeholder="password" type="text">
+		</form>
+	</div>
+	<div data-theme="c" data-role="footer" data-position="fixed">
+		<div class="ui-grid-a"> 
+			<div class="ui-block-a">
+				<button data-theme="b" onclick="login();">登录</button>
+			</div>
+			<div class="ui-block-b">
+				<a data-role="button" href="register" data-theme="b" >注册</a>
+			</div>
+		</div> 
+	</div>
+</div>
+
+<div data-role="popup" id="usrpw-wrong" class="ui-content" data-theme="e" style="max-width:350px;">
+	<p>password or username is wrong,please input again<p>
+</div>
+<div data-role="popup" id="usrpw-empty" class="ui-content" data-theme="e" style="max-width:350px;">
+	<p>username or password is empty<p>
+</div>
+{{end}}

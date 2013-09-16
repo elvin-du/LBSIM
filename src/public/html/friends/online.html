@@ -1,0 +1,31 @@
+{{define "content"}}
+<div data-role="page" id="online-page">
+	<div data-theme="a" data-role="header" data-position="fixed">
+		<div data-role="navbar">
+			<ul>
+				<li><a id="chatTab" href='javascript:window.location="friends/chat"'>chat</a></li>
+				<li><a id ="onlineTab" href='javascript:window.location="friens/online"' class="ui-btn-active ui-state-persist">online</a></li>
+				<li><a id ="routeTab" href='javascript:window.location="friends/route"'>route</a></li>
+				<li><a id ="settingTab" href='javascript:window.location="friends/setting"'>setting</a></li>
+			</ul>
+		</div><!-- /navbar -->
+	</div>
+	<div data-role="content">
+		<ul data-role="listview" data-split-icon="gear" data-split-theme="d">
+			{{with .AllUser}}
+			{{range .}}
+			<li name="online">
+			<a href='javascript:window.location="route?withwho={{.Name}}"'>{{.Name}}</a>
+			<a id={{.Name}} href='javascript:window.location="chat?withwho={{.Name}}"'>chat with {{.Name}}</a>
+			</li>
+			{{end}}
+			{{end}}
+		</ul>
+	</div>
+</div>	
+{{end}}
+
+{{define "css"}}
+{{end}}
+{{define "js"}}
+{{end}}

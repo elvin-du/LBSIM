@@ -1,0 +1,30 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta charset="gb2312"/>
+		<meta name="viewport" content="width=device-width,initial-scale=1.0">
+		<link rel="stylesheet" href="http://code.jquery.com/mobile/1.3.0/jquery.mobile-1.3.0.min.css" />
+		<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+		<script src="http://code.jquery.com/mobile/1.3.0/jquery.mobile-1.3.0.min.js"></script>
+		<script src="http://maps.googleapis.com/maps/api/js?key=AIzaSyCUrsdVrY0c5EIqkrbfI0YduQlFfTG-n18&sensor=true"></script>
+		<script src="templates/js/route.js"></script>
+	</head>
+	<body onload="routeInit();">
+		<div data-role="page" id="route-page" style="width:100%;height:100%">
+			<div data-theme="a" data-role="header" data-position="fixed">
+				<div data-role="navbar">
+					<ul>
+						<li><a id="chatTab" href='javascript:window.location="chat"'>chat</a></li>
+						<li><a id="onlineTab" href='javascript:window.location="onlinefriends"'>online</a></li>
+						<li><a id="routeTab" href='javascript:window.location="route"' class="ui-btn-active ui-state-persist">route</a></li>
+					</ul>
+				</div><!-- /navbar -->
+			</div>
+			<div data-role="content" id="mapCanvas" style="width:100%;height:350px" class="page_map">
+			</div>
+			<div data-theme="c" data-role="footer" data-position="fixed">
+				<a href="#" data-inline="false" data-icon="search" data-role="button" data-theme="b" onclick="calcRoute({{.Latitude}},{{.Longitude}});">caculate route</a>
+			</div>
+		</div>		
+	</body>
+</html>

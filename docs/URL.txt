@@ -1,0 +1,11 @@
+/
+/acount/login
+/acount/register
+/admin/login
+/admin/register
+/friends/chat?with=friendsname
+/friends/route?with=friendsname
+/friends/online
+/friends/add
+/friends/del
+/friends/search
